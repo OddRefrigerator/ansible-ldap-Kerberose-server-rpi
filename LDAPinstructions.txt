@@ -1,0 +1,89 @@
+====================================================
+Scratch pad
+====================================================
+String  X.500 AttributeType
+------------------------------
+CN      commonName
+L       localityName
+ST      stateOrProvinceName
+O       organizationName
+OU      organizationalUnitName
+C       countryName
+STREET  streetAddress
+DC      domainComponent
+UID     userid
+
+ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
+ldapsearch -x -b "uid=steve,ou=people,dc=home,dc=com" -s sub "objectclass=*"
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=ldapUsers,dc=home,dc=com"
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
+ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f editGroups.ldif -W 
+
+sudo nano /etc/ldapscripts/ldapscripts.conf
+sudo ldapadduser user1 Users
+sudo cat /var/log/ldapscripts.log
+
+sudo apt install -y ansible ansible-doc
+scp -r ansible-kerberos-server/ pi@kdc.home.com:~
+scp -r ansible-ldap-server/ pi@kdc.home.com:~
+
+kadmin.local -q "addprinc steve@HOME.COM"
+sudo kadmin.local -q "listprincs"
+
+FILE:/etc/krb5.keytab
+
+ssh-keygen -b 2048 -t rsa -C "pi key"
+ssh-copy-id steve@steve-oldlaptop.home.com
+ssh-copy-id pi@kdc.home.com
+
+find / -name slapd.conf
+nano /usr/share/slapd/slapd.conf
+{SSHA}1J+MC+Z5hTve+VCsEtleIyKgVsts2ufU
+
+sudo timedatectl set-timezone America/Toronto
+
+find / -type f -exec grep -H 'binddn' {} \;
+
+====================================================
+Instructions
+====================================================
+On Server:
+----------
+sudo kadmin.local -q "addprinc -randkey host/kdc.home.com"
+sudo kadmin.local -q "addprinc -randkey ldap/kdc.home.com@HOME.COM"
+sudo kadmin.local -q "ktadd host/kdc.home.com@HOME.COM"
+sudo kadmin.local -q "ktadd ldap/kdc.home.com@HOME.COM"
+
+sudo apt install -y slapd ldap-utils
+sudo dpkg-reconfigure slapd
+
+sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
+sudo ldapadd -x -D cn=admin,dc=home,dc=com -W -f add_content.ldif
+ldapsearch -x -LLL -H ldap:/// -b dc=home,dc=com
+sudo slapcat -v -b dc=home,dc=com -l out.ldif
+
+copy /usr/share/slapd/slapd.conf
+copy /etc/ldap/ldap.conf 
+copy /etc/ldapscripts/ldapscripts.conf
+copy /etc/nsswitch.conf 
+
+sudo apt install libnss-ldap libpam-krb5 libsasl2-dev libsasl2-modules-gssapi-mit libsasl2-modules
+sudo dpkg-reconfigure libnss-ldap
+sudo pam-auth-update
+
+sudo apt install ldapscripts
+sudo sh -c "echo -n 'password123' > /etc/ldapscripts/ldapscripts.passwd"
+sudo chmod 400 /etc/ldapscripts/ldapscripts.passwd
+
+On client:
+----------
+sudo apt install libnss-ldap libpam-krb5 libpam-ldap
+
+sudo kadmin -p krbadmin 
+sudo kadmin -q "addprinc -randkey host/kdc.home.com"
+sudo kadmin -q "ktadd host/kdc.home.com"
+
+sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
+sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
