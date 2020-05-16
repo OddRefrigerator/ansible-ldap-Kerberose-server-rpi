@@ -1,14 +1,21 @@
-dn: ou=Machines,dc=home,dc=com
+dn: ou=Users,dc=home,dc=com
+objectClass: top
 objectClass: organizationalUnit
-ou: Machines
+ou: Users
 
 dn: ou=Groups,dc=home,dc=com
+objectClass: top
 objectClass: organizationalUnit
 ou: Groups
 
-dn: ou=Users,dc=home,dc=com
+dn: ou=Machines,dc=home,dc=com
+objectClass: top
 objectClass: organizationalUnit
-ou: Users
+ou: Machines
+
+dn: ou=Idmap,dc=home,dc=com
+objectClass: organizationalUnit
+ou: Idmap
 
 dn: cn=ldapUsers,ou=Groups,dc=home,dc=com
 objectClass: posixGroup
@@ -19,13 +26,8 @@ description: ldap users
 dn: uid=steve,ou=Users,dc=home,dc=com
 objectClass: account
 objectClass: posixAccount
-objectClass: shadowAccount
-objectClass: inetOrgPerson
 uid: steve
-sn: ancliffe
-givenName: Stephen Ancliffe
-cn: Stephen Ancliffe
-displayName: Stephen Ancliffe
+cn: steve
 uidNumber: 10000
 gidNumber: 10001
 userPassword: password123
@@ -37,13 +39,8 @@ description: My ldap account
 dn: uid=pi,ou=Users,dc=home,dc=com
 objectClass: account
 objectClass: posixAccount
-objectClass: shadowAccount
-objectClass: inetOrgPerson
 uid: pi
-sn: raspberry
-givenName: raspberry pi
-cn: raspberry pi
-displayName: raspberry pi
+cn: pi
 uidNumber: 10000
 gidNumber: 10001
 userPassword: password123
