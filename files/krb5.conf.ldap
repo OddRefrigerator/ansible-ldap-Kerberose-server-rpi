@@ -31,8 +31,6 @@
 [dbdefaults]
  ldap_kerberos_container_dn = "dc=home,dc=com"
  ldap_kadmind_dn = "cn=kadmin-service,dc=home,dc=com"
- ldap_kdc_sasl_mech = EXTERNAL
- ldap_kadmind_sasl_mech = EXTERNAL
  ldap_servers = ldap://kdc.home.com
  
 [appdefaults]
@@ -44,3 +42,15 @@
   krb4_convert = false
  }
 
+ 
+[dbmodules]
+ openldap_ldapconf = {
+     db_library = kldap
+     disable_last_success = true
+     disable_lockout  = true
+     ldap_kdc_dn =  "uid=kdc-service,dc=home,dc=com"
+     ldap_kadmind_dn =  "uid=kadmin-service,dc=home,dc=com"
+     ldap_service_password_file = /etc/krb5.keytab
+     ldap_servers = ldap://kdc.home.com
+     ldap_conns_per_server = 5
+     }
