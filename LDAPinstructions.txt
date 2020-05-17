@@ -1,4 +1,31 @@
 ====================================================
+Instructions
+====================================================
+On Server:
+----------
+sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
+sudo ./createkrb5princs.sh 
+sudo ./createKerberoseDB.sh
+sudo apt install -y slapd ldap-utils schema2ldif
+sudo dpkg-reconfigure slapd
+sudo ./installldapscripts.sh
+sudo apt install libnss-ldapd libpam-krb5 libsasl2-{dev,modules-gssapi-mit,modules}
+sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
+sudo dpkg-reconfigure libnss-ldapd
+sudo pam-auth-update
+sudo ./copyConfigfiles.sh
+sudo ./populateldap.sh
+
+On client:
+----------
+sudo apt install libnss-ldapd libpam-krb5 libpam-ldap
+sudo kadmin -p krbadmin 
+sudo kadmin -q "addprinc -randkey host/kdc.home.com"
+sudo kadmin -q "ktadd host/kdc.home.com"
+sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
+sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
+
+====================================================
 Scratch pad
 ====================================================
 String  X.500 AttributeType
@@ -113,29 +140,3 @@ dn: olcDatabase={1}mdb,cn=config
 
 sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
 
-====================================================
-Instructions
-====================================================
-On Server:
-----------
-sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
-sudo ./createkrb5princs.sh 
-sudo ./createKerberoseDB.sh
-sudo apt install -y slapd ldap-utils schema2ldif
-sudo dpkg-reconfigure slapd
-sudo ./installldapscripts.sh
-sudo apt install libnss-ldapd libpam-krb5 libsasl2-{dev,modules-gssapi-mit,modules}
-sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
-sudo dpkg-reconfigure libnss-ldapd
-sudo pam-auth-update
-sudo ./copyConfigfiles.sh
-sudo ./populateldap.sh
-
-On client:
-----------
-sudo apt install libnss-ldapd libpam-krb5 libpam-ldap
-sudo kadmin -p krbadmin 
-sudo kadmin -q "addprinc -randkey host/kdc.home.com"
-sudo kadmin -q "ktadd host/kdc.home.com"
-sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
-sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
