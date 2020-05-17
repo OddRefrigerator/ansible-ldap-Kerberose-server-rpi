@@ -13,13 +13,29 @@ STREET  streetAddress
 DC      domainComponent
 UID     userid
 
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
+ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f editGroups.ldif -W 
+ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f updatePW.ldif -W
+
+
 ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
 ldapsearch -x -b "uid=steve,ou=people,dc=home,dc=com" -s sub "objectclass=*"
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=ldapUsers,dc=home,dc=com"
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
-ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
-ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f editGroups.ldif -W 
+sudo ldapsearch -H ldapi:// -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
+sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" cn
+ldapsearch -H ldap://kdc.home.com -x -b "" -s base -LLL supportedSASLMechanisms
+supportedSASLMechanisms: SCRAM-SHA-1
+supportedSASLMechanisms: SCRAM-SHA-256
+supportedSASLMechanisms: GS2-IAKERB
+supportedSASLMechanisms: GS2-KRB5
+supportedSASLMechanisms: GSS-SPNEGO
+supportedSASLMechanisms: GSSAPI
+supportedSASLMechanisms: DIGEST-MD5
+supportedSASLMechanisms: NTLM
+supportedSASLMechanisms: CRAM-MD5
+
 
 sudo nano /etc/ldapscripts/ldapscripts.conf
 sudo ldapadduser user1 Users
@@ -42,9 +58,35 @@ find / -name slapd.conf
 nano /usr/share/slapd/slapd.conf
 {SSHA}1J+MC+Z5hTve+VCsEtleIyKgVsts2ufU
 
+{SSHA}b+EhQPYbK0diOyzi3Y/hjELaTMbCtPKn
+
 sudo timedatectl set-timezone America/Toronto
 
 find / -type f -exec grep -H 'binddn' {} \;
+
+journalctl --since "2020-05-16 17:51:00" -u systemd-sysuser
+
+sudo kadmin.local -q "addprinc -randkey nfs/kdc.home.com@HOME.COM"
+sudo kadmin.local -q "addprinc -randkey nfs/192.168.1.10@HOME.COM"
+sudo kadmin.local -q "ktadd nfs/kdc.home.com@HOME.COM"
+sudo kadmin.local -q "ktadd nfs/192.168.1.10@HOME.COM"
+sudo kadmin.local -q "addprinc pi"
+sudo kadmin.local -q "ktadd -k /etc/krb5.keytab pi@HOME.COM"
+
+sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
+sudo sh -c "echo -n 'password123' > /etc/ldapscripts/ldapscripts.passwd"
+
+cn=admin,dc=home,dc=com
+uid=steve,ou=Users,dc=home,dc=com
+
+sudo dpkg-reconfigure slapd
+sudo dpkg-reconfigure libnss-ldap
+
+dn: cn={1}cosine,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: {1}cosine
+
+sudo ldap-schema-manager -i kerberos.schema
 
 ====================================================
 Instructions
@@ -54,20 +96,30 @@ On Server:
  sudo ./createkrb5princs.sh 
 <!----------
 kadmin.local -q "addprinc -randkey host/kdc.home.com"
+kadmin.local -q "addprinc -randkey host/192.168.1.10@HOME.COM"
 kadmin.local -q "addprinc -randkey ldap/kdc.home.com@HOME.COM"
-kadmin.local -q "ktadd host/kdc.home.com@HOME.COM"
-kadmin.local -q "ktadd ldap/kdc.home.com@HOME.COM"
+kadmin.local -q "addprinc -randkey ldap/192.168.1.10@HOME.COM"
+kadmin.local -q "addprinc -randkey nfs/kdc.home.com@HOME.COM"
+kadmin.local -q "addprinc -randkey nfs/192.168.1.10@HOME.COM"
+kadmin.local -q "ktadd -k /etc/krb5.keytab host/kdc.home.com@HOME.COM"
+kadmin.local -q "ktadd -k /etc/krb5.keytab ldap/kdc.home.com@HOME.COM"
+kadmin.local -q "ktadd -k /etc/krb5.keytab ldap/192.168.1.10@HOME.COM"
+kadmin.local -q "ktadd -k /etc/krb5.keytab nfs/192.168.1.10@HOME.COM"
+kadmin.local -q "ktadd -k /etc/krb5.keytab nfs/kdc.home.com@HOME.COM"
 ---!>
 
-sudo apt install -y slapd ldap-utils
+sudo apt install -y slapd ldap-utils krb5-kdc-ldap schema2ldif
 sudo dpkg-reconfigure slapd
 
 sudo ./populateldap.sh
 <!----------
-sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
-sudo ldapadd -x -D cn=admin,dc=home,dc=com -W -f add_content.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ../ldif/logging.ldif
+cd /usr/share/doc/krb5-kdc-ldap
+gunzip /usr/share/doc/krb5-kdc-ldap/kerberos.schema.gz
+ldap-schema-manager -i kerberos.schema
+ldapadd -x -D cn=admin,dc=home,dc=com -W -f ../ldif/add_content.ldif
 ldapsearch -x -LLL -H ldap:/// -b dc=home,dc=com
-sudo slapcat -v -b dc=home,dc=com -l out.ldif
+slapcat -v -b dc=home,dc=com -l out.ldif
 ---!>
 
 sudo ./installldapscripts.sh
@@ -79,21 +131,20 @@ chmod 400 /etc/ldapscripts/ldapscripts.passwd
 
 sudo ./copyConfigfiles.sh
 <!----------
-cp ldapscripts.conf /etc/ldapscripts/ldapscripts.conf
-cp slapd.conf /usr/share/slapd/slapd.conf
-cp ldap.conf  /etc/ldap/ldap.conf 
-cp nsswitch.conf /etc/nsswitch.conf 
+sudo cp ../config/slapd.conf /usr/share/slapd/slapd.conf
+sudo cp ../config/ldap.conf  /etc/ldap/ldap.conf 
+sudo cp ../config/nsswitch.conf /etc/nsswitch.conf 
+sudo cp ../config/ldapscripts.conf /etc/ldapscripts/ldapscripts.conf
 --->
 
-sudo apt install libnss-ldap libpam-krb5 libsasl2-dev libsasl2-modules-gssapi-mit libsasl2-modules
-
+sudo apt install libnss-ldapD libpam-krb5 libsasl2-dev libsasl2-modules-gssapi-mit libsasl2-modules
+sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
+sudo dpkg-reconfigure libnss-ldapd
 sudo pam-auth-update
-
-sudo dpkg-reconfigure libnss-ldap
 
 On client:
 ----------
-sudo apt install libnss-ldap libpam-krb5 libpam-ldap
+sudo apt install libnss-ldapd libpam-krb5 libpam-ldap
 
 sudo kadmin -p krbadmin 
 sudo kadmin -q "addprinc -randkey host/kdc.home.com"

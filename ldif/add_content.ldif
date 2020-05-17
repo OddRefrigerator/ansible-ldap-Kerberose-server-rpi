@@ -17,37 +17,9 @@ dn: ou=Idmap,dc=home,dc=com
 objectClass: organizationalUnit
 ou: Idmap
 
-dn: cn=ldapUsers,ou=Groups,dc=home,dc=com
-objectClass: posixGroup
-cn: ldapUsers
-gidNumber: 10001
-description: ldap users
-
-dn: uid=steve,ou=Users,dc=home,dc=com
-objectClass: account
-objectClass: posixAccount
-uid: steve
-cn: steve
-uidNumber: 10000
-gidNumber: 10001
-userPassword: password123
-gecos: Stephen Ancliffe
-loginShell: /bin/bash
-homeDirectory: /home/steve
-description: My ldap account
-
-dn: uid=pi,ou=Users,dc=home,dc=com
-objectClass: account
-objectClass: posixAccount
-uid: pi
-cn: pi
-uidNumber: 10000
-gidNumber: 10001
-userPassword: password123
-gecos: raspberry pi
-loginShell: /bin/bash
-homeDirectory: /home/pi
-description: raspberry pi service account
+dn: cn=Manager,dc=home,dc=com
+objectclass: organizationalRole
+cn: Manager
 
 dn: cn=servers,ou=Groups,dc=home,dc=com
 objectClass: posixGroup
@@ -90,4 +62,37 @@ homeDirectory: /dev/null
 loginShell: /bin/false
 gecos: steve-oldlaptop.home.com
 description: Machine account
+
+dn: cn=ldapUsers,ou=Groups,dc=home,dc=com
+objectClass: posixGroup
+cn: ldapUsers
+gidNumber: 10001
+description: ldap users
+
+dn: uid=steve,ou=Users,dc=home,dc=com
+objectClass: account
+objectClass: posixAccount
+uid: steve
+cn: steve
+uidNumber: 10000
+gidNumber: 10001
+userPassword: password123
+gecos: Stephen Ancliffe
+loginShell: /bin/bash
+homeDirectory: /home/steve
+description: My ldap account
+
+dn: uid=pi,ou=Users,dc=home,dc=com
+objectClass: account
+objectClass: posixAccount
+uid: pi
+cn: pi
+uidNumber: 10000
+gidNumber: 10001
+userPassword: password123
+gecos: raspberry pi
+loginShell: /bin/bash
+homeDirectory: /home/pi
+description: raspberry pi service account
+
 
