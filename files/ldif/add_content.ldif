@@ -27,20 +27,6 @@ cn: servers
 gidNumber: 10002
 description: Group account
 
-dn: uid=kdc-service,dc=home,dc=com
-uid: kdc-service
-objectClass: account
-objectClass: simpleSecurityObject
-userPassword: {CRYPT}x
-description: Account used for the Kerberos KDC
-
-dn: uid=kadmin-service,dc=home,dc=com
-uid: kadmin-service
-objectClass: account
-objectClass: simpleSecurityObject
-userPassword: {CRYPT}x
-description: Account used for the Kerberos Admin server
-
 dn: uid=srv1.home.com,ou=Machines,dc=home,dc=com
 objectClass: account
 objectClass: posixAccount

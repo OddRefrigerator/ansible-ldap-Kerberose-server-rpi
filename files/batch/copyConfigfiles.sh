@@ -1,6 +1,7 @@
 #!/bin/bash
 #KRB5
-cp krb5.conf.ldap /etc/krb5.conf
+cp krb5.conf /etc/krb5.conf
+cp kdc.conf /etc/krb5kdc/kdc.conf
 #ldap
 cp slapd.conf /usr/share/slapd/slapd.conf
 cp ldap.conf  /etc/ldap/ldap.conf 
