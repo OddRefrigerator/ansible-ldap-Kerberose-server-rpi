@@ -1,20 +1,27 @@
 ====================================================
 Instructions
 ====================================================
-On Server:
-----------
-sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
-sudo ./createkrb5princs.sh 
+KRB5 service:
+----------------------------
+sudo hostnamectl set-hostname auth.home.com
+sudo timedatectl set-timezone America/Toronto
+sudo apt update && sudo apt upgrade -y
+sudo apt install krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 -y
 sudo ./createKerberoseDB.sh
-sudo apt install -y slapd ldap-utils schema2ldif
-sudo dpkg-reconfigure slapd
-sudo ./installldapscripts.sh
-sudo apt install libnss-ldapd libpam-krb5 libsasl2-{dev,modules-gssapi-mit,modules}
+sudo ./createkrb5princs.sh 
+
+LDAP service
+----------------------------
+sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd 
+sudo kdb5_ldap_util -D cn=admin,dc=home,dc=com create -subtrees dc=home,dc=com -r HOME.COM -s -H ldapi:/// -w password123 -P password123
 sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
 sudo dpkg-reconfigure libnss-ldapd
 sudo pam-auth-update
-sudo ./copyConfigfiles.sh
 sudo ./populateldap.sh
+sudo ./installldapscripts.sh
+
+#sudo ./copyConfigfiles.sh
+
 
 On client:
 ----------
@@ -25,34 +32,58 @@ sudo kadmin -q "ktadd host/kdc.home.com"
 sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
 sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
 
+kadmin-service
+
 ====================================================
 Scratch pad
 ====================================================
-String  X.500 AttributeType
-------------------------------
-CN      commonName
-L       localityName
-ST      stateOrProvinceName
-O       organizationName
-OU      organizationalUnitName
-C       countryName
-STREET  streetAddress
-DC      domainComponent
-UID     userid
+kdb5_util destroy [-f]
+dn: cn=krbContainer,dc=home,dc=com
+cn=admin,dc=auth,dc=home,dc=com
+cn=admin,dc=auth,dc=home,dc=com
+
+find . -type f -exec grep -H 'admin' {} \;
+
+sudo dpkg-reconfigure krb5-config
+sudo dpkg-reconfigure slapd
+sudo dpkg-reconfigure libnss-ldapd
+
+ldapwhoami -Y EXTERNAL -H ldapi:///
+sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config cn
+
+sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}mdb,cn=config
+sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=com
+olcDatabase={1}mdb,cn=config
+
+ldapwhoami -Y EXTERNAL -H ldapi:///  -D "dc=home,dc=com"
+ldapwhoami -x -D cn=admin,dc=home,dc=com
+
+ldappasswd  -Y EXTERNAL -H ldapi:/// pi uid=pi,ou=Users,dc=home,dc=com
+
+sudo kdb5_ldap_util -D cn=admin,dc=auth,dc=home,dc=com create -s -r HOME.COM -H ldapi:///
+
+
 
 ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f addkrb5Index.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f krb5admin.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f krb5admin.ldif
+
 ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f editGroups.ldif -W 
 ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f updatePW.ldif -W
 
-
-ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
+ldapsearch -H ldap://auth.home.com -x -b "" -s base -LLL supportedSASLMechanisms
+ldapsearch -H ldapi:/// -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
 ldapsearch -x -b "uid=steve,ou=people,dc=home,dc=com" -s sub "objectclass=*"
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
+ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=ldapUsers,dc=home,dc=com"
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" cn
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
-sudo ldapsearch -H ldapi:// -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
-sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" cn
-ldapsearch -H ldap://kdc.home.com -x -b "" -s base -LLL supportedSASLMechanisms
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
+
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config -s base "objectclass=*"
+
 supportedSASLMechanisms: SCRAM-SHA-1
 supportedSASLMechanisms: SCRAM-SHA-256
 supportedSASLMechanisms: GS2-IAKERB
@@ -87,8 +118,6 @@ nano /usr/share/slapd/slapd.conf
 
 {SSHA}b+EhQPYbK0diOyzi3Y/hjELaTMbCtPKn
 
-sudo timedatectl set-timezone America/Toronto
-
 find / -type f -exec grep -H 'binddn' {} \;
 
 journalctl --since "2020-05-16 17:51:00" -u systemd-sysuser
@@ -100,15 +129,15 @@ sudo kadmin.local -q "ktadd nfs/192.168.1.10@HOME.COM"
 sudo kadmin.local -q "addprinc pi"
 sudo kadmin.local -q "ktadd -k /etc/krb5.keytab pi@HOME.COM"
 
+sudo kadmin.local -q "ktadd krbtgt/HOME.COM@home.com"
+
 sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
 sudo sh -c "echo -n 'password123' > /etc/ldapscripts/ldapscripts.passwd"
 
 cn=admin,dc=home,dc=com
 uid=steve,ou=Users,dc=home,dc=com
 
-sudo dpkg-reconfigure krb5-config
-sudo dpkg-reconfigure libnss-ldap
-sudo dpkg-reconfigure slapd
+
 
 dn: cn={1}cosine,cn=schema,cn=config
 objectClass: olcSchemaConfig
@@ -140,3 +169,16 @@ dn: olcDatabase={1}mdb,cn=config
 
 sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
 
+
+
+String  X.500 AttributeType
+------------------------------
+CN      commonName
+L       localityName
+ST      stateOrProvinceName
+O       organizationName
+OU      organizationalUnitName
+C       countryName
+STREET  streetAddress
+DC      domainComponent
+UID     userid

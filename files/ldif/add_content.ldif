@@ -27,6 +27,20 @@ cn: servers
 gidNumber: 10002
 description: Group account
 
+dn: uid=kdc-service,dc=home,dc=com
+uid: kdc-service
+objectClass: account
+objectClass: simpleSecurityObject
+userPassword: {CRYPT}x
+description: Account used for the Kerberos KDC
+
+dn: uid=kadmin-service,dc=home,dc=com
+uid: kadmin-service
+objectClass: account
+objectClass: simpleSecurityObject
+userPassword: {CRYPT}x
+description: Account used for the Kerberos Admin server
+
 dn: uid=srv1.home.com,ou=Machines,dc=home,dc=com
 objectClass: account
 objectClass: posixAccount
@@ -39,16 +53,16 @@ loginShell: /bin/false
 gecos: srv1.home.com
 description: Machine account
 
-dn: uid=kdc.home.com,ou=Machines,dc=home,dc=com
+dn: uid=auth.home.com,ou=Machines,dc=home,dc=com
 objectClass: account
 objectClass: posixAccount
-cn: kdc.home.com
-uid: kdc.home.com
+cn: auth.home.com
+uid: auth.home.com
 uidNumber: 20001
 gidNumber: 10002
 homeDirectory: /dev/null
 loginShell: /bin/false
-gecos: kdc.home.com
+gecos: auth.home.com
 description: Machine account
 
 dn: uid=steve-oldlaptop.home.com,ou=Machines,dc=home,dc=com
@@ -69,19 +83,6 @@ cn: ldapUsers
 gidNumber: 10001
 description: ldap users
 
-dn: uid=steve,ou=Users,dc=home,dc=com
-objectClass: account
-objectClass: posixAccount
-uid: steve
-cn: steve
-uidNumber: 10000
-gidNumber: 10001
-userPassword: password123
-gecos: Stephen Ancliffe
-loginShell: /bin/bash
-homeDirectory: /home/steve
-description: My ldap account
-
 dn: uid=pi,ou=Users,dc=home,dc=com
 objectClass: account
 objectClass: posixAccount
@@ -89,7 +90,7 @@ uid: pi
 cn: pi
 uidNumber: 10000
 gidNumber: 10001
-userPassword: password123
+userPassword: raspberry
 gecos: raspberry pi
 loginShell: /bin/bash
 homeDirectory: /home/pi

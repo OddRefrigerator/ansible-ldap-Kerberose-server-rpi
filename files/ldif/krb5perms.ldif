@@ -1,0 +1,16 @@
+dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: to dn.subtree="cn=krbContainer,dc=home,dc=com"
+  by dn.exact="uid=kdc-service,dc=home,dc=com" read
+  by dn.exact="uid=kadmin-service,dc=home,dc=com" write
+  by * none
+
+dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: to attrs=krbPrincipalKey by anonymous auth
+  by dn.exact="uid=kdc-service,dc=home,dc=com" read
+  by dn.exact="uid=kadmin-service,dc=home,dc=com" write
+  by self write
+  by * none
