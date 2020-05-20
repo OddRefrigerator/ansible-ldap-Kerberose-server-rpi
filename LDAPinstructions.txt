@@ -11,21 +11,23 @@ sudo cp krb5.conf /etc/krb5.conf
 sudo cp kdc.conf /etc/krb5kdc/kdc.conf
 sudo systemctl restart krb5-kdc
 sudo systemctl restart krb5-admin-server
-sudo ./createkrb5princs.sh 
+#sudo ./createkrb5princs.sh 
 
 LDAP service
 ----------------------------
-sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd 
-sudo cp ldap.conf  /etc/ldap/ldap.conf 
+sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd
 sudo systemctl restart slapd
+sudo cp ldap.conf  /etc/ldap/ldap.conf 
 sudo cp slapd.conf /usr/share/slapd/slapd.conf
 sudo systemctl restart slapd
 sudo ./populateldap.sh
-sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile cn=krbadmin,cn=auth,dc=example,dc=com
+sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kdc-service,ou=Users,dc=home,dc=com
+sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kadmin-service,ou=Users,dc=home,dc=com
+sudo ./installldapscripts.sh
+
 sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
 sudo dpkg-reconfigure libnss-ldapd
 sudo pam-auth-update
-sudo ./populateldap.sh
 sudo ./installldapscripts.sh
 
 On client:
@@ -53,11 +55,15 @@ sudo dpkg-reconfigure krb5-config
 sudo dpkg-reconfigure slapd
 sudo dpkg-reconfigure libnss-ldapd
 
-ldapwhoami -Y EXTERNAL -H ldapi:///
+ldapsearch -H ldap://auth.home.com -x -b "dc=home,dc=home"
+ldapwhoami -H ldap://auth.home.com -x
+sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=com
+
 sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config cn
 
 sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}mdb,cn=config
 sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=com
+sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=krbContainer,dc=home,dc=com
 olcDatabase={1}mdb,cn=config
 
 ldapwhoami -Y EXTERNAL -H ldapi:///  -D "dc=home,dc=com"
@@ -175,6 +181,17 @@ dn: olcDatabase={1}mdb,cn=config
 sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
 
 
+#sudo kdb5_ldap_util -D uid=admin,dc=auth,dc=home,dc=com -w password123 stashsrvpw uid=kdc-service,dc=auth,dc=home,dc=com
+
+#dn: cn={4}kerberos,cn=schema,cn=config
+# cn=kerberos,cn=schema,cn=config
+# cn=krbContainer,dc=home,dc=com
+#sudo ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5admin.ldif -c
+#sudo ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5perms.ldif -c
+#sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=kerberos,cn=schema,cn=config
+#sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=auth,dc=home,dc=com
+#sudo kdb5_ldap_util -D uid=admin,dc=auth,dc=home,dc=com -w password123 stashsrvpw uid=kdc-service,dc=auth,dc=home,dc=com
+#sudo kdb5_ldap_util -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com create -subtrees dc=home,dc=com -P password123 -r HOME.COM -s
 
 String  X.500 AttributeType
 ------------------------------
