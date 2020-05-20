@@ -2,6 +2,7 @@
 #give pi krb5 account
 kadmin.local -q "addprinc -pw raspberry pi"
 kadmin.local -q "addprinc -pw raspberry pi/admin"
+kadmin.local -q "addprinc -pw password123 krb5ldap/admin"
 #kadmin.local -q "ktadd -k /etc/krb5kdc/kadm5.keytab pi/admin@HOME.COM"
 #Services-FQDN
 kadmin.local -q "addprinc -randkey host/auth.home.com@HOME.COM"

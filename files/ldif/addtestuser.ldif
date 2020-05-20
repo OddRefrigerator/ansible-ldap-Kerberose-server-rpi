@@ -1,0 +1,6 @@
+dn: uid=piadm,dc=home,dc=com
+objectClass: account
+objectClass: simpleSecurityObject
+uid: piadm
+userPassword: {CRYPT}x
+description: Account used for pi admin
