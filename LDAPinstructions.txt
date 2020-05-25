@@ -4,7 +4,7 @@ Instructions
 KRB5 service:
 ----------------------------
 sudo ./setupHost.sh
-sudo apt install krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 -y
+sudo apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 
 sudo systemctl stop krb5-kdc
 sudo systemctl stop krb5-admin-server
 sudo kdb5_util create -s -r HOME.COM -P password123
@@ -19,6 +19,7 @@ LDAP service
 sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd
 sudo cp ldap.conf  /etc/ldap/ldap.conf 
 sudo cp slapd.conf /usr/share/slapd/slapd.conf
+sudo cp nsswitch.conf /etc/nsswitch.conf
 sudo ./populateldap.sh
 sudo systemctl restart krb5-kdc
 sudo systemctl restart krb5-admin-server
