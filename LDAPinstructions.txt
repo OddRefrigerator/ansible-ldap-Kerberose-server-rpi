@@ -6,19 +6,16 @@ KRB5 service:
 sudo ./setupHost.sh
 sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 
 sudo ./copyKRB5ConfigFiles.sh
+#CHANGE THIS--> realm and password should be dynamically set from ENV variable or prog switch
 sudo kdb5_util create -s -r HOME.COM -P password123
 sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server
 
 LDAP service
 ----------------------------
 sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd
-sudo cp ldap.conf  /etc/ldap/ldap.conf 
-sudo cp slapd.conf /usr/share/slapd/slapd.conf
-sudo cp nsswitch.conf /etc/nsswitch.conf
+sudo ./copyLDAPConfigFiles.sh
 sudo ./populateldap.sh
-sudo systemctl restart krb5-kdc
-sudo systemctl restart krb5-admin-server
-sudo systemctl restart slapd
+sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server && sudo systemctl restart slapd
 sudo ./installldapscripts.sh
 
 On client:
