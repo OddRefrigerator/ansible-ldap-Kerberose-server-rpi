@@ -4,9 +4,9 @@
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ../ldif/logging.ldif
 
 #Set password for admin
-export slapAdmin=password123
-sudo slappasswd -s $slapAdmin -h {SSHA} > slapAdminSSH.txt
-sed -i -e '/oldPassword/{r slapAdminSSH.txt' -e 'd}' ../ldif/newPassword.ldif
+slapAdmin=password123
+pass=$(sudo slappasswd -s $slapAdmin -h {SSHA})
+sed -r "s/olcRootPW: oldPassword/olcRootPW: $pass/g" ../ldif/newPassword.ldif
 sudo ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW | tee ../ldif/newpasswd.ldif
 
 #Install kerberose schema

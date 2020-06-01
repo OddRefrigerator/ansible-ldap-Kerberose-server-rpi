@@ -4,15 +4,10 @@ Instructions
 KRB5 service:
 ----------------------------
 sudo ./setupHost.sh
-sudo apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 
-sudo systemctl stop krb5-kdc
-sudo systemctl stop krb5-admin-server
+sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 
+sudo ./copyKRB5ConfigFiles.sh
 sudo kdb5_util create -s -r HOME.COM -P password123
-sudo cp kadm5.acl /etc/krb5kdc/kadm5.acl
-sudo cp krb5.conf /etc/krb5.conf
-sudo cp kdc.conf /etc/krb5kdc/kdc.conf
-sudo systemctl start krb5-kdc
-sudo systemctl start krb5-admin-server
+sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server
 
 LDAP service
 ----------------------------
@@ -28,7 +23,7 @@ sudo ./installldapscripts.sh
 
 On client:
 ----------
-sudo apt install libnss-ldapd libpam-krb5 libpam-ldap
+sudo  apt install libnss-ldapd libpam-krb5 libpam-ldap
 sudo kadmin -p krbadmin 
 sudo kadmin -q "addprinc -randkey host/kdc.home.com"
 sudo kadmin -q "ktadd host/kdc.home.com"
@@ -37,10 +32,12 @@ sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
 
 kadmin-service
 
+
+
 ====================================================
 Scratch pad
 ====================================================
-kdb5_util destroy [-f]
+sudo kdb5_util destroy -f /var/lib/krb5kdc/principal
 dn: cn=krbContainer,dc=home,dc=com
 cn=admin,dc=auth,dc=home,dc=com
 cn=admin,dc=auth,dc=home,dc=com
