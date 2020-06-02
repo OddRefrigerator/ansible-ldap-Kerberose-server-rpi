@@ -15,6 +15,7 @@ LDAP service
 sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd
 sudo ./copyLDAPConfigFiles.sh
 sudo ./populateldap.sh
+sudo systemctl daemon-reload
 sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server && sudo systemctl restart slapd
 sudo ./installldapscripts.sh
 
@@ -26,9 +27,6 @@ sudo kadmin -q "addprinc -randkey host/kdc.home.com"
 sudo kadmin -q "ktadd host/kdc.home.com"
 sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
 sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
-
-kadmin-service
-
 
 
 ====================================================
