@@ -4,7 +4,7 @@ Instructions
 KRB5 service:
 ----------------------------
 sudo ./setupHost.sh
-sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5 
+sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5
 sudo ./copyKRB5ConfigFiles.sh
 #CHANGE THIS--> realm and password should be dynamically set from ENV variable or prog switch
 sudo kdb5_util create -s -r HOME.COM -P password123
@@ -12,10 +12,10 @@ sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server
 
 LDAP service
 ----------------------------
-sudo apt install -y slapd ldap-utils schema2ldif libnss-ldapd
+sudo DEBIAN_FRONTEND=noninteractive apt install -y slapd ldap-utils schema2ldif libnss-ldapd
 sudo ./copyLDAPConfigFiles.sh
-sudo ./populateldap.sh
 sudo systemctl daemon-reload
+sudo ./populateldap.sh
 sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server && sudo systemctl restart slapd
 sudo ./installldapscripts.sh
 
@@ -81,13 +81,13 @@ ldapsearch -H ldap://auth.home.com -x -b "" -s base -LLL supportedSASLMechanisms
 ldapsearch -H ldapi:/// -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
 ldapsearch -x -b "uid=steve,ou=people,dc=home,dc=com" -s sub "objectclass=*"
 ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
+
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=ldapUsers,dc=home,dc=com"
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" cn
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=HOME.COM,cn=krbContainer,dc=home,dc=com
-
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config -s base "objectclass=*"
 
 supportedSASLMechanisms: SCRAM-SHA-1
