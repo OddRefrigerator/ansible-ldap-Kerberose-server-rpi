@@ -3,15 +3,22 @@ Instructions
 ====================================================
 KRB5 service:
 ----------------------------
-sudo ./setupHost.sh
-sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5
-sudo ./copyKRB5ConfigFiles.sh
+sudo ./setupKRB5.sh
+#sudo ./setupHost.sh
+#sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5
+#sudo ./copyKRB5ConfigFiles.sh
 #CHANGE THIS--> realm and password should be dynamically set from ENV variable or prog switch
-sudo kdb5_util create -s -r HOME.COM -P password123
-sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server
+#sudo kdb5_util create -s -r HOME.COM -P password123
+#sudo systemctl restart krb5-kdc && sudo systemctl restart krb5-admin-server
 
 LDAP service
 ----------------------------
+export REALM="HOME.COM"
+export krb5DBpw="password123"
+export krb5admpw="password123"
+export krb5kdcldap="password123"
+export krb5adminldap="password123"
+
 sudo DEBIAN_FRONTEND=noninteractive apt install -y slapd ldap-utils schema2ldif libnss-ldapd
 sudo ./copyLDAPConfigFiles.sh
 sudo systemctl daemon-reload
@@ -28,132 +35,96 @@ sudo kadmin -q "ktadd host/kdc.home.com"
 sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
 sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
 
-
 ====================================================
 Scratch pad
 ====================================================
-sudo kdb5_util destroy -f /var/lib/krb5kdc/principal
-dn: cn=krbContainer,dc=home,dc=com
+cn=krbContainer,dc=home,dc=com
 cn=admin,dc=auth,dc=home,dc=com
-cn=admin,dc=auth,dc=home,dc=com
+cn=kerberos,cn=schema,cn=config
+cn={4}kerberos,cn=schema,cn=config
+uid=kdc-service,dc=home,dc=com
+uid=kadmin-service,dc=home,dc=com
 
 find . -type f -exec grep -H 'admin' {} \;
+find / -type f -exec grep -H 'binddn' {} \;
+find / -name slapd.conf
 
-#sudo ./createkrb5princs.sh 
-#sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
-#sudo dpkg-reconfigure libnss-ldapd
-#sudo pam-auth-update
+nano /usr/share/slapd/slapd.conf
+
+journalctl --since "2020-05-16 17:51:00" -u systemd-sysuser
 
 sudo dpkg-reconfigure krb5-config
 sudo dpkg-reconfigure slapd
 sudo dpkg-reconfigure libnss-ldapd
-
-sudo ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5admin.ldif -c
-
-ldapsearch -H ldap://auth.home.com -x -b "dc=home,dc=home"
-ldapwhoami -H ldap://auth.home.com -x
-sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=com
-
-sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config cn
-
-sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}mdb,cn=config
-sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=com
-sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=krbContainer,dc=home,dc=com
-olcDatabase={1}mdb,cn=config
-
-ldapwhoami -Y EXTERNAL -H ldapi:///  -D "dc=home,dc=com"
-ldapwhoami -x -D cn=admin,dc=home,dc=com
-
-ldappasswd  -Y EXTERNAL -H ldapi:/// pi uid=pi,ou=Users,dc=home,dc=com
-
-#kdb5_util create -s -r HOME.COM -P password123
-#kdb5_ldap_util -D cn=admin,dc=auth,dc=home,dc=com create -subtrees dc=home,dc=com -r HOME.COM -s -H ldapi:///
-
-ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
-ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f addkrb5Index.ldif
-ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f krb5admin.ldif
-ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f krb5admin.ldif
-
-ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f editGroups.ldif -W 
-ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f updatePW.ldif -W
-
-ldapsearch -H ldap://auth.home.com -x -b "" -s base -LLL supportedSASLMechanisms
-ldapsearch -H ldapi:/// -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
-ldapsearch -x -b "uid=steve,ou=people,dc=home,dc=com" -s sub "objectclass=*"
-ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
-
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=ldapUsers,dc=home,dc=com"
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" cn
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=HOME.COM,cn=krbContainer,dc=home,dc=com
-ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config -s base "objectclass=*"
-
-supportedSASLMechanisms: SCRAM-SHA-1
-supportedSASLMechanisms: SCRAM-SHA-256
-supportedSASLMechanisms: GS2-IAKERB
-supportedSASLMechanisms: GS2-KRB5
-supportedSASLMechanisms: GSS-SPNEGO
-supportedSASLMechanisms: GSSAPI
-supportedSASLMechanisms: DIGEST-MD5
-supportedSASLMechanisms: NTLM
-supportedSASLMechanisms: CRAM-MD5
-
-
-sudo nano /etc/ldapscripts/ldapscripts.conf
-sudo ldapadduser user1 Users
-sudo cat /var/log/ldapscripts.log
+sudo pam-auth-update
 
 sudo apt install -y ansible ansible-doc
 scp -r ansible-kerberos-server/ pi@kdc.home.com:~
 scp -r ansible-ldap-server/ pi@kdc.home.com:~
 
-kadmin.local -q "addprinc steve@HOME.COM"
-sudo kadmin.local -q "listprincs"
-
-FILE:/etc/krb5.keytab
-
 ssh-keygen -b 2048 -t rsa -C "pi key"
 ssh-copy-id steve@steve-oldlaptop.home.com
 ssh-copy-id pi@kdc.home.com
 
-find / -name slapd.conf
-nano /usr/share/slapd/slapd.conf
-{SSHA}1J+MC+Z5hTve+VCsEtleIyKgVsts2ufU
+KRB5_TRACE=/dev/stdout kinit wronguser
 
-{SSHA}b+EhQPYbK0diOyzi3Y/hjELaTMbCtPKn
-
-find / -type f -exec grep -H 'binddn' {} \;
-
-journalctl --since "2020-05-16 17:51:00" -u systemd-sysuser
-
-sudo kadmin.local -q "addprinc -randkey nfs/kdc.home.com@HOME.COM"
-sudo kadmin.local -q "addprinc -randkey nfs/192.168.1.10@HOME.COM"
-sudo kadmin.local -q "ktadd nfs/kdc.home.com@HOME.COM"
-sudo kadmin.local -q "ktadd nfs/192.168.1.10@HOME.COM"
-sudo kadmin.local -q "addprinc pi"
-sudo kadmin.local -q "ktadd -k /etc/krb5.keytab pi@HOME.COM"
-
-sudo kadmin.local -q "ktadd krbtgt/HOME.COM@home.com"
+kadmin.local -q "addprinc -randkey nfs/kdc.home.com@HOME.COM"
+kadmin.local -q "addprinc -randkey nfs/192.168.1.10@HOME.COM"
+kadmin.local -q "addprinc steve@HOME.COM"
+kadmin.local -q "ktadd nfs/kdc.home.com@HOME.COM"
+kadmin.local -q "ktadd nfs/192.168.1.10@HOME.COM"
+kadmin.local -q "ktadd -k /etc/krb5.keytab pi@HOME.COM"
+kadmin.local -q "ktadd krbtgt/HOME.COM@home.com"
+kadmin.local -q "addprinc pi"
+kadmin.local -q "listprincs"
 
 sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
 sudo sh -c "echo -n 'password123' > /etc/ldapscripts/ldapscripts.passwd"
+sudo nano /etc/ldapscripts/ldapscripts.conf
+sudo cat /var/log/ldapscripts.log
 
-# kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldap.keyfile "uid=root,dc=home,dc=com"
-# sudo kdb5_ldap_util -D cn=admin,dc=auth,dc=home,dc=com create -s -r HOME.COM -H ldapi:/// 
+kdb5_ldap_util -D cn=admin,dc=auth,dc=home,dc=com create -s -r HOME.COM -H ldapi:/// 
+kdb5_ldap_util -D cn=admin,dc=auth,dc=home,dc=com create -subtrees dc=home,dc=com -r HOME.COM -s -H ldapi:///
+kdb5_ldap_util -D uid=admin,dc=auth,dc=home,dc=com -w password123 stashsrvpw uid=kdc-service,dc=auth,dc=home,dc=com
+kdb5_ldap_util -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com create -subtrees dc=home,dc=com -P password123 -r HOME.COM -s
+kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldap.keyfile "uid=root,dc=home,dc=com"
+kdb5_util create -s -r HOME.COM -P password123
+kdb5_util destroy -f /var/lib/krb5kdc/principal
 
-cn=admin,dc=home,dc=com
-uid=steve,ou=Users,dc=home,dc=com
+ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5admin.ldif -c
+ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5perms.ldif -c
 
-dn: cn={1}cosine,cn=schema,cn=config
-objectClass: olcSchemaConfig
-cn: {1}cosine
+ldapwhoami -x -D cn=admin,dc=home,dc=com
+ldapwhoami -H ldap://auth.home.com -x
+ldapwhoami -Y EXTERNAL -H ldapi:///  -D "dc=home,dc=com"
 
-sudo ldap-schema-manager -i kerberos.schema
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f logging.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f addkrb5Index.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f krb5admin.ldif
+ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f krb5admin.ldif
+ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f editGroups.ldif -W 
+ldapmodify -H ldapi:/// -D "cn=admin,dc=home,dc=com" -f updatePW.ldif -W
 
-ldapsearch -x -LLL -H ldap:/// -b {1}mdb,cn=config
-ldapsearch -x -LLL -H ldap:/// -b olcDatabase={1}mdb,cn=config
+ldapsearch -x -b "uid=steve,ou=people,dc=home,dc=com" -s sub "objectclass=*"
+ldapsearch -x -LLL -b dc=home,dc=com 'uid=steve' cn gidNumber ou
+ldapsearch -H ldap://auth.home.com -x -b "" -s base -LLL supportedSASLMechanisms
+ldapsearch -H ldap://auth.home.com -x -b "dc=home,dc=home"
+ldapsearch -H ldapi:/// -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" olcSuffix olcRootDN olcRootPW -LLL -Q
+ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=com
+ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=auth,dc=home,dc=com
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=krbContainer,dc=home,dc=com
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=kerberos,cn=schema,cn=config
+ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}mdb,cn=config
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config cn
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config -s base "objectclass=*"
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=HOME.COM,cn=krbContainer,dc=home,dc=com
+
+ldappasswd -x -D cn=admin,dc=home,dc=com -s password123 uid=kdc-service,dc=home,dc=com -w password123
+ldappasswd -x -D cn=admin,dc=home,dc=com -s password123 uid=kadmin-service,dc=home,dc=com -w password123
+ldappasswd -Y EXTERNAL -H ldapi:/// pi uid=pi,ou=Users,dc=home,dc=com
 
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// <<EOF
 dn: olcDatabase={1}mdb,cn=config
@@ -166,28 +137,29 @@ objectClass: olcSchemaConfig
 cn: schema
 olcObjectIdentifier
 
-ldappasswd -x -D cn=admin,dc=home,dc=com -S uid=kdc-service,dc=home,dc=com -w password123
-ldappasswd -x -D cn=admin,dc=home,dc=com -S uid=kadmin-service,dc=home,dc=com -w password123
+dn: cn={1}cosine,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: {1}cosine
 
-sudo ldappasswd -x -D cn=admin,dc=home,dc=com -s password123 uid=kdc-service,dc=home,dc=com -w password123
-sudo ldappasswd -x -D cn=admin,dc=home,dc=com -s password123 uid=kadmin-service,dc=home,dc=com -w password123
+[logging]
+ default = FILE:/var/log/krb5-default.log
+ kdc = FILE:/var/log/krb5-kdc.log
+ admin_server = FILE:/var/log/krb5-admin.log
 
-dn: olcDatabase={1}mdb,cn=config
+[logging]
+ default = SYSLOG:DEBUG:DAEMON
+ kdc = SYSLOG:DEBUG:DAEMON
+ admin_server = SYSLOG:DEBUG:DAEMON
 
-sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
-
-
-#sudo kdb5_ldap_util -D uid=admin,dc=auth,dc=home,dc=com -w password123 stashsrvpw uid=kdc-service,dc=auth,dc=home,dc=com
-
-#dn: cn={4}kerberos,cn=schema,cn=config
-# cn=kerberos,cn=schema,cn=config
-# cn=krbContainer,dc=home,dc=com
-#sudo ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5admin.ldif -c
-#sudo ldapadd -x -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com -f krb5perms.ldif -c
-#sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=kerberos,cn=schema,cn=config
-#sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=auth,dc=home,dc=com
-#sudo kdb5_ldap_util -D uid=admin,dc=auth,dc=home,dc=com -w password123 stashsrvpw uid=kdc-service,dc=auth,dc=home,dc=com
-#sudo kdb5_ldap_util -D cn=admin,dc=home,dc=com -w password123 -H ldap://auth.home.com create -subtrees dc=home,dc=com -P password123 -r HOME.COM -s
+supportedSASLMechanisms: SCRAM-SHA-1
+supportedSASLMechanisms: SCRAM-SHA-256
+supportedSASLMechanisms: GS2-IAKERB
+supportedSASLMechanisms: GS2-KRB5
+supportedSASLMechanisms: GSS-SPNEGO
+supportedSASLMechanisms: GSSAPI
+supportedSASLMechanisms: DIGEST-MD5
+supportedSASLMechanisms: NTLM
+supportedSASLMechanisms: CRAM-MD5
 
 String  X.500 AttributeType
 ------------------------------
