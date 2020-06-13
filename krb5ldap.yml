@@ -1,0 +1,102 @@
+ # krb5ldap.yml ldap with krb5 auth installation See vars/vars.yml for variables in use
+- name: Install ldap server packages
+  apt:
+    pkg: 
+    - ldap-utils 
+    - libnss-ldapd 
+    - schema2ldif 
+    - slapd
+- name: Copy file ldap.conf with owner and permissions
+  template:
+    src: template/ldap.conf.j2
+    dest: /etc/ldap/ldap.conf
+    owner: root
+    group: root
+    mode: '0644'
+- name: Copy file sldap.conf with owner and permissions
+  template:
+    src: template/slapd.conf.j2
+    dest: /usr/share/slapd/slapd.conf
+    owner: root
+    group: root
+    mode: '0644'
+- name: Copy file nsswitch with owner and permissions
+  template:
+    src: template/nsswitch.conf.j2
+    dest: /etc/nsswitch.conf
+    owner: root
+    group: root
+    mode: '0644'
+- name: Reload configs
+  systemd: daemon_reload=yes
+- name: Configure ldap logging level
+  ldap_attr:
+    dn: cn=config
+    name: olcLogLevel
+    values: any
+    state: exact
+- name: set ldap admin pw
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcRootPW
+    values: {{ ldapAdminpw }}
+    state: exact
+- name: Copy schema to /etc/ldap/schema/
+  copy:
+    src: /usr/share/doc/krb5-kdc-ldap/kerberos.schema.gz
+    dest: /etc/ldap/schema/
+    owner: root
+    group: root
+    mode: '0644'
+- name: Extract kerberos.schema.gz into /var/lib/foo
+  unarchive:
+    src: /etc/ldap/schema/kerberos.schema.gz
+    dest: /etc/ldap/schema/
+- name: Import schema
+  shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.schema
+- name: Add krb5 index
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcDbIndex
+    values: "{{ item }}"
+  with_items:
+    - krbPrincipalName eq
+    - pres
+    - sub
+- name: Set up the krb5 ACL
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcAccess
+    values:
+      - >-
+        {2} to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+        by dn.exact="uid=kdc-service,{{ ldapBaseDN }}" write
+        by dn.exact="uid=kadmin-service,{{ ldapBaseDN }}" write
+        by dn.exact="cn=admin,{{ ldapBaseDN }}" write
+        by * none
+      - >-
+       {3} to attrs=krbPrincipalKey 
+       by anonymous auth
+       by dn.exact="uid=kdc-service,{{ ldapBaseDN }}" write
+       by dn.exact="uid=kadmin-service,{{ ldapBaseDN }}" write
+       by self write
+       by * none
+    state: exact
+- name: Set up krb5 kdc user
+  ldap_attr:
+    dn: olcDatabase={1}hdb,cn=config
+    name: "{{ item.key }}"
+    values: "{{ item.value }}"
+    state: exact
+  with_dict:
+    olcRootDN: uid=kdc-service,{{ ldapBaseDN }}
+    olcRootPW: {{ ldapkdcpw }}
+- name: Set up krb5 admin user
+  ldap_attr:
+    dn: olcDatabase={1}hdb,cn=config
+    name: "{{ item.key }}"
+    values: "{{ item.value }}"
+    state: exact
+  with_dict:
+    olcRootDN: uid=kadmin-service,{{ ldapBaseDN }}
+    olcRootPW: {{ ldapadminpw }}

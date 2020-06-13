@@ -43,4 +43,5 @@ sudo kdb5_ldap_util -D cn=admin,dc=home,dc=com -w $krb5admpw -H ldap://auth.home
 
 #Create krb5 default contaners
 sudo ldapadd -x -D uid=kdc-service,dc=home,dc=com -w $krb5kdcldap -H ldap://auth.home.com -f ../ldif/krb5Containers.ldif -c
+ldapsearch -x -D uid=kdc-service,dc=home,dc=com -w $krb5kdcldap -H ldap://auth.home.com
 

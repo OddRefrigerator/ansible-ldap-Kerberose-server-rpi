@@ -5,7 +5,7 @@ KRB5 service:
 ----------------------------
 sudo ./setupKRB5.sh
 #sudo ./setupHost.sh
-#sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-krb5
+#sudo DEBIAN_FRONTEND=noninteractive apt install -y krb5-{kdc,admin-server,config,user,kdc-ldap} libsasl2-{dev,modules-gssapi-mit,modules} libpam-krb5 sssd-{krb5,krb5-common}
 #sudo ./copyKRB5ConfigFiles.sh
 #CHANGE THIS--> realm and password should be dynamically set from ENV variable or prog switch
 #sudo kdb5_util create -s -r HOME.COM -P password123
@@ -16,10 +16,10 @@ LDAP service
 export REALM="HOME.COM"
 export krb5DBpw="password123"
 export krb5admpw="password123"
-export krb5kdcldap="password123"
+export krb5Kdcldap="password123"
 export krb5adminldap="password123"
 
-sudo DEBIAN_FRONTEND=noninteractive apt install -y slapd ldap-utils schema2ldif libnss-ldapd
+sudo DEBIAN_FRONTEND=noninteractive apt install -y ldap-utils libnss-ldapd schema2ldif slapd
 sudo ./copyLDAPConfigFiles.sh
 sudo systemctl daemon-reload
 sudo ./populateldap.sh
@@ -28,12 +28,13 @@ sudo ./installldapscripts.sh
 
 On client:
 ----------
-sudo  apt install libnss-ldapd libpam-krb5 libpam-ldap
+#sudo apt install krb5-{user,config,doc,k5tls} libpam-{krb5,ccreds} sssd
+sudo  apt install libpam-krb5 libpam-ldap libnss-ldapd
 sudo kadmin -p krbadmin 
-sudo kadmin -q "addprinc -randkey host/kdc.home.com"
-sudo kadmin -q "ktadd host/kdc.home.com"
-sudo kadmin.local -q "addprinc -randkey host/steve-oldlaptop.home.com"
-sudo kadmin -q "ktadd host/steve-oldlaptop.home.com"
+sudo kadmin -q "addprinc -randkey host/auth.home.com"
+sudo kadmin -q "ktadd host/auth.home.com"
+sudo kadmin.local -q "addprinc -randkey host/oldlaptop.home.com"
+sudo kadmin -q "ktadd host/oldlaptop.home.com"
 
 ====================================================
 Scratch pad
@@ -43,6 +44,8 @@ cn=admin,dc=auth,dc=home,dc=com
 cn=kerberos,cn=schema,cn=config
 cn={4}kerberos,cn=schema,cn=config
 uid=kdc-service,dc=home,dc=com
+uid=kadmin-service,dc=home,dc=com
+
 uid=kadmin-service,dc=home,dc=com
 
 find . -type f -exec grep -H 'admin' {} \;
