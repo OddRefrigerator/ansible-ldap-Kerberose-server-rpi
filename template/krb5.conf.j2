@@ -6,18 +6,36 @@
 [libdefaults]
  dns_lookup_realm = true
  dns_lookup_kdc = true
- default_realm = {{ krb5realm }}
+ default_realm = {{ krb5realm|upper() }}
  ticket_lifetime = 24h
  rdns = false
  renew_lifetime = 7d
  forwardable = true
  
 [realms]
-	{{ krb5realm }} = {
-		kdc = {{ krb5KDCSrv }}
-		admin_server = {{ krb5AdminSrv }}
+	{{ krb5realm|upper() }} = {
+		kdc = {{ krb5KDCSrv|lower }}
+		admin_server = {{ krb5AdminSrv|lower }}
+		{% if 'ldapEnabled' == true %}
+		database_module = openldap_ldapconf
+		{% endif %}
 	}
 
 [domain_realm]
- .{{ krb5realm|lower }} = {{ krb5realm }}
-{{ krb5realm|lower }} = {{ krb5realm }}
+ .{{ krb5realm|lower }} = {{ krb5realm|upper() }}
+{{ krb5realm|lower }} = {{ krb5realm|upper() }}
+		
+{% if 'ldapEnabled'== true %}
+[dbmodules] 
+ openldap_ldapconf = {
+     db_library = kldap
+     disable_last_success = true
+     disable_lockout = true
+     ldap_kdc_dn = "uid=kdc-service,{{ ldapBaseDN }}"
+     ldap_kadmind_dn = "uid=kadmin-service,{{ ldapBaseDN }}"
+     ldap_kerberos_container_dn = "cn=krbContainer,{{ ldapBaseDN }}"
+     ldap_servers = ldap://{{ hostName }}
+     ldap_service_password_file = /etc/krb5kdc/ldapservice.keyfile
+     ldap_conns_per_server = 5
+    }
+{% endif %}

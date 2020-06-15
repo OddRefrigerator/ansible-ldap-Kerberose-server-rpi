@@ -19,6 +19,8 @@
     group: root
     mode: '0644'
 - name: Copy file krb5.conf with owner and permissions
+  vars: 
+    ldapEnabled: false
   template:
     src: template/krb5.conf.j2
     dest: /etc/krb5.conf
@@ -33,7 +35,7 @@
     group: root
     mode: '0644'
 - name: Create realm
-  shell: kdb5_util create -s -r "{{ krb5realm }}" -P "{{ krb5DBpw }}"
+  shell: kdb5_util create -s -r {{ krb5realm }} -P {{ krb5DBpw }}
 - name: start KDC 
   service:
     name: krb5-kdc 

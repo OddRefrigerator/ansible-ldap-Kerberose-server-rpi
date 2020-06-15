@@ -6,6 +6,6 @@ krb5KDCSrv: auth.home.com
 krb5AdminSrv: auth.home.com
 ldapDBpw: password123
 ldapBaseDN: dc=home,dc=com
-ldapAdminpw: {SSHA}XdBUFS2hkiEGqSL1mXE/RcVAnybIFBR9
+ldapAdminpw: "{SSHA}XdBUFS2hkiEGqSL1mXE/RcVAnybIFBR9"
 ldapkdcpw: password123
-ldapadminpw: password123
+ldapkadminpw: password123

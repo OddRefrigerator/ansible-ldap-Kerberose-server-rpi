@@ -21,4 +21,4 @@
       force_apt_get: yes #Needed for Raspbian(buster) 
       cache_valid_time: 86400 #One day
   - import_tasks: krb5.yml
-  #- import_tasks: krb5ldap.yml
+  - import_tasks: krb5ldap.yml
