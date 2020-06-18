@@ -4,15 +4,14 @@
   vars_files:
     - vars/vars.yml
   any_errors_fatal: true
-  remote_user: root
+  remote_user: root 
   become: yes
   become_method: su
   tasks:
-  - name: Add krb5 index
+  - name: set ldap admin pw
     ldap_attr:
       dn: olcDatabase={1}mdb,cn=config
-      name: olcDbIndex
-      values: "{{ item }}"
-    with_items:
-      - krbPrincipalName eq,pres,sub
-      
+      name: olcRootPW
+      values: "{{ ldapAdminpw }}"
+      state: exact
+
