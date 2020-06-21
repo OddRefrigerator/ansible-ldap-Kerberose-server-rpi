@@ -1,0 +1,24 @@
+---
+- name: Install kerberose on Raspbian(buster)
+  hosts: localhost
+  vars_files:
+    - vars/vars.yml
+  any_errors_fatal: true
+  remote_user: root
+  become: yes
+  become_method: su
+  tasks:
+  - name: Set timezone
+    timezone:
+      name: "{{ timeZone }}"
+  - name: Set hostname
+    hostname: 
+      name: "{{ hostName }}"
+  - name: Update & upgrade all packages to the latest version (This can take a while)
+    apt:
+      upgrade: yes
+      update_cache: yes
+      force_apt_get: yes #Needed for Raspbian(buster) 
+      cache_valid_time: 86400 #One day
+  - import_tasks: krb5.yml
+  - import_tasks: krb5ldap.yml

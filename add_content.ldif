@@ -1,0 +1,59 @@
+dn: ou=groups,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: ou=users,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=machines,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: machines
+
+dn: cn=servers,ou=groups,dc=home,dc=com
+objectClass: posixGroup
+cn: servers
+gidNumber: 10001
+description: Server group
+
+dn: cn=netUser,ou=groups,dc=home,dc=com
+objectClass: posixGroup
+cn: netUser
+gidNumber: 10002
+description: Server group
+
+dn: uid=pi,ou=users,dc=home,dc=com
+uid: pi
+uidNumber: 10001
+gidNumber: 10002
+cn: pi
+sn: pi
+objectClass: top
+objectClass: person
+objectClass: posixAccount
+objectClass: shadowAccount
+loginShell: /bin/bash
+homeDirectory: /home/pi
+userPassword: {CRYPT}*
+gecos: raspberry pi
+description: raspberry pi service account
+
+dn: uid=kodi,ou=users,dc=home,dc=com
+uid: kodi
+uidNumber: 10002
+gidNumber: 10002
+cn: kodi
+sn: kodi
+objectClass: top
+objectClass: person
+objectClass: posixAccount
+objectClass: shadowAccount
+loginShell: /bin/bash
+homeDirectory: /home/kodi
+userPassword: {CRYPT}*
+gecos: kodi
+description: kodi service account
+

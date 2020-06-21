@@ -1,0 +1,68 @@
+# Schema and objectClass definitions
+include         /etc/ldap/schema/core.schema
+include         /etc/ldap/schema/cosine.schema
+include         /etc/ldap/schema/nis.schema
+include         /etc/ldap/schema/inetorgperson.schema
+include         /etc/ldap/schema/kerberose.schema
+
+pidfile         /var/run/slapd/slapd.pid
+argsfile        /var/run/slapd/slapd.args
+
+sasl-secprops noanonymous,noplain,noactive
+sasl-realm {{ krb5realm|upper() }}
+sasl-host {{ hostName }}
+
+authz-policy from
+authz-regexp "^uid=[^,/]+/admin,cn=home\.com,cn=gssapi,cn=auth" "cn=krbContainer,dc=home,dc=com"
+authz-regexp "^uid=host/([^,]+)\.home\.com,cn=home\.com,cn=gssapi,cn=auth" "cn=$1,ou=hosts,dc=home,dc=com"
+authz-regexp "^uid=([^,]+),cn=home\.com,cn=gssapi,cn=auth" "uid=$1,ou=users,dc=home,dc=com"
+
+loglevel        16384
+modulepath	/usr/lib/ldap
+moduleload	back_@BACKEND@
+sizelimit 500
+tool-threads 1
+backend		@BACKEND@
+
+#######################################################################
+# Specific Directives for database #1, of type @BACKEND@:
+# Database specific directives apply to this databasse until another
+# 'database' directive occurs
+database        mdb      
+suffix          "{{ ldapBaseDN }}"
+rootdn          "cn=admin,{{ ldapBaseDN }}"
+rootpw          {{ ldapAdminpw }}
+directory       "/var/lib/ldap"
+
+# For the Debian package we use 2MB as default but be sure to update this
+# value if you have plenty of RAM
+dbconfig set_cachesize 0 2097152 0
+# Number of objects that can be locked at the same time.
+dbconfig set_lk_max_objects 1500
+# Number of locks (both requested and granted)
+dbconfig set_lk_max_locks 1500
+# Number of lockers
+dbconfig set_lk_max_lockers 1500
+
+# Indexing options for database #1
+index           objectClass eq
+
+# Save the time that the entry gets modified, for database #1
+lastmod         on
+
+# Checkpoint the BerkeleyDB database periodically in case of system
+# failure and to speed slapd shutdown.
+checkpoint      512 30
+
+
+access to attrs=userPassword,shadowLastChange
+        by dn="@ADMIN@" write
+        by anonymous auth
+        by self write
+        by * none
+
+access to dn.base="" by * read
+
+access to *
+        by dn="@ADMIN@" write
+        by * read
