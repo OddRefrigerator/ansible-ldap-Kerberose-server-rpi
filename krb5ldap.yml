@@ -48,16 +48,27 @@
     state: exact
 - name: Copy schema to /etc/ldap/schema/
   copy:
+<<<<<<< HEAD
     src: /usr/share/doc/krb5-kdc-ldap/kerberos.schema.gz
+=======
+    src: /usr/share/doc/krb5-kdc-ldap/kerberos.openldap.ldif.gz
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
     dest: /etc/ldap/schema/
     remote_src: yes
     owner: root
     group: root
     mode: '0644'
+<<<<<<< HEAD
 - name: Extract kerberos.schema.gz into /etc/ldap/schema/
   shell: gunzip /etc/ldap/schema/kerberos.schema.gz
 - name: Import kerberos schema
   shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.schema
+=======
+- name: Extract kerberos.openldap.ldif.gz into /etc/ldap/schema/
+  shell: gunzip /etc/ldap/schema/kerberos.openldap.ldif.gz
+- name: Import kerberos schema
+  shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.openldap.ldif
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
 - name: Add krb5 index
   ldap_attr:
     dn: olcDatabase={1}mdb,cn=config
@@ -69,6 +80,7 @@
     - member,memberUid eq
     - krbPrincipalName eq,pres,sub
     state: exact
+<<<<<<< HEAD
 - name: Set up krb5 kdc user
   ldap_entry:
     dn: cn=krb5-kdc,{{ ldapBaseDN }}
@@ -95,6 +107,8 @@
       cn: krb5-admin
       description: KDC admin service account
       userPassword: "{{ ldapAdminpwPlain }}"
+=======
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
 - name: Set up the krb5 ACL 
   ldap_attr:
     dn: olcDatabase={1}mdb,cn=config
@@ -110,6 +124,7 @@
        by self write
        by * read
       - >-
+<<<<<<< HEAD
        {2}to attrs=krbPrincipalKey
        by anonymous auth
        by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
@@ -143,6 +158,62 @@
     responses: 
      Password for (?i): "{{ ldapkdcpw }}"
      Re-enter password for (?i): "{{ ldapkdcpw }}"
+=======
+       {2}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+       by dn.exact="uid=kdc-service,{{ ldapBaseDN }}" write
+       by dn.exact="uid=kadmin-service,{{ ldapBaseDN }}" write
+       by dn.exact="cn=admin,{{ ldapBaseDN }}" write
+       by * none
+      - >-
+       {3}to attrs=krbPrincipalKey
+       by anonymous auth
+       by dn.exact="uid=kdc-service,{{ ldapBaseDN }}" write
+       by dn.exact="uid=kadmin-service,{{ ldapBaseDN }}" write
+       by self write
+       by * none
+      - >- 
+       {4}to * 
+       by * read
+    state: exact
+- name: Set up krb5 kdc user
+  ldap_entry:
+    dn: cn=kdc-service,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      cn: kdc-service
+      description: KDC service account
+      userPassword: "{{ ldapAdminpwPlain }}"
+- name: Set up krb5 admin user
+  ldap_entry:
+    dn: cn=kadmin-service,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      cn: kadmin-service
+      description: kadmin service account
+      userPassword: "{{ ldapAdminpwPlain }}"
+- name: create service keyfile for kdc
+  expect:
+    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kdc-service,{{ ldapBaseDN }}
+    responses: 
+     Password for (?i): "{{ ldapkdcpw }}"
+     Re-enter password for (?i): "{{ ldapkdcpw }}"
+- name: create service keyfile for admin
+  expect:
+    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kadmin-service,{{ ldapBaseDN }}
+    responses: 
+     Password for (?i): "{{ ldapkadminpw }}"
+     Re-enter password for (?i): "{{ ldapkadminpw }}"
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
 - name: restart slapd
   service:
     name: slapd
@@ -157,6 +228,7 @@
     mode: '0644'
 - name: Create realm
   shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees cn=krbContainer,{{ ldapBaseDN }} -P {{ krb5DBpw }} -r {{ krb5realm }} -s
+<<<<<<< HEAD
 - name: Copy file ldapscripts.conf 
   template:
     src: template/ldapscripts.conf.j2
@@ -166,3 +238,5 @@
     mode: '0400'
 - name: set ldap scripts password 
   shell: sh -c "echo -n '{{ ldapAdminpwPlain }}' > /etc/ldapscripts/ldapscripts.passwd"
+=======
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
