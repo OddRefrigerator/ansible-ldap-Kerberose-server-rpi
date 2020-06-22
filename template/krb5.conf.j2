@@ -1,16 +1,17 @@
 [logging]
+ default = FILE:/var/lib/krb5kdc/krb5-default.log
+ kdc = CONSOLE
  kdc = FILE:/var/lib/krb5kdc/krb5-kdc.log
+ admin_server = CONSOLE
  admin_server = FILE:/var/lib/krb5kdc/krb5-admin.log
- default = FILE:/var/lib/krb5kdc/krb5-libs.log
 
 [libdefaults]
+ default_realm = {{ krb5realm|upper() }}
+ default_tkt_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
+ default_tgs_enctypes = aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96
  dns_lookup_realm = true
  dns_lookup_kdc = true
- default_realm = {{ krb5realm|upper() }}
- ticket_lifetime = 24h
  rdns = false
- renew_lifetime = 7d
- forwardable = true
  
 [realms]
 	{{ krb5realm|upper() }} = {
