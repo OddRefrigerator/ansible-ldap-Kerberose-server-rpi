@@ -21,7 +21,7 @@ description: Server group
 
 dn: uid=pi,ou=users,dc=home,dc=com
 uid: pi
-uidNumber: 10001
+uidNumber: 10000
 gidNumber: 10001
 cn: pi
 sn: pi
@@ -40,7 +40,7 @@ uid: mediaPlayer
 uidNumber: 10002
 gidNumber: 10001
 cn: mediaPlayer
-sn: kodmediaPlayeri
+sn: mediaPlayer
 objectClass: top
 objectClass: person
 objectClass: posixAccount

@@ -2,45 +2,25 @@ include         /etc/ldap/schema/core.schema
 include         /etc/ldap/schema/cosine.schema
 include         /etc/ldap/schema/nis.schema
 include         /etc/ldap/schema/inetorgperson.schema
-include         /etc/ldap/schema/kerberose.schema
+include         /etc/ldap/schema/kerberos.schema
 
 pidfile         /var/run/slapd/slapd.pid
 argsfile        /var/run/slapd/slapd.args
 
-sasl-secprops noanonymous,noplain,noactive
-sasl-realm {{ krb5realm|upper() }}
-sasl-host {{ hostName }}
+#sasl-realm {{ krb5realm|upper() }}
+#sasl-host {{ hostName }}
 
 authz-policy from
-authz-regexp "^uid=[^,/]+/admin,cn=home\.com,cn=gssapi,cn=auth" "cn=krbContainer,dc=home,dc=com"
-authz-regexp "^uid=host/([^,]+)\.home\.com,cn=home\.com,cn=gssapi,cn=auth" "cn=$1,ou=hosts,dc=home,dc=com"
-authz-regexp "^uid=([^,]+),cn=home\.com,cn=gssapi,cn=auth" "uid=$1,ou=users,dc=home,dc=com"
+authz-regexp
+  uid=([^,]*),cn=[^,]*,cn=auth
+  uid=$1,ou=users,dc=home,dc=com
 
-loglevel        16384
-modulepath	/usr/lib/ldap
-moduleload	back_@BACKEND@
-sizelimit 500
-tool-threads 1
-backend		@BACKEND@
-
-database        mdb      
-suffix          "{{ ldapBaseDN }}"
-rootdn          "cn=admin,{{ ldapBaseDN }}"
-rootpw          {{ ldapAdminpw }}
-directory       "/var/lib/ldap"
-
-dbconfig set_cachesize 0 2097152 0
-dbconfig set_lk_max_objects 1500
-dbconfig set_lk_max_locks 1500
-dbconfig set_lk_max_lockers 1500
-
-index           objectClass eq
-lastmod         on
-
-checkpoint      512 30
+authz-regexp
+  uid=([^,]*),cn=auth
+  uid=$1,ou=users,dc=home,dc=com
 
 access to attrs=userPassword,shadowLastChange
-        by dn="@ADMIN@" write
+        by dn="cn=krb5-admin,{{ ldapBaseDN }}" write
         by anonymous auth
         by self write
         by * none
@@ -48,5 +28,27 @@ access to attrs=userPassword,shadowLastChange
 access to dn.base="" by * read
 
 access to *
-        by dn="@ADMIN@" write
+        by dn="cn=krb5-admin,{{ ldapBaseDN }}" write
         by * read
+
+password-hash {SSHA}
+loglevel        16384
+modulepath	/usr/lib/ldap
+moduleload	back_mdb
+sizelimit 500
+tool-threads 1
+
+defaultsearchbase "{{ ldapBaseDN }}"
+
+backend         mdb
+database        mdb    
+suffix          "{{ ldapBaseDN }}" 
+directory       "/var/lib/ldap"
+
+index           objectClass eq
+lastmod         on
+checkpoint      512 30
+
+
+
+
