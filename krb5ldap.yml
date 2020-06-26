@@ -5,7 +5,10 @@
     pkg: 
     - krb5-kdc-ldap
     - ldap-utils 
-    - libnss-ldapd 
+    - libnss-ldapd
+    - libsasl2-modules-ldap
+    - libsasl2-modules-gssapi-mit
+    - libpam-ldap
     - schema2ldif 
     - slapd
     - python3-ldap
@@ -57,6 +60,12 @@
   shell: gunzip -f /etc/ldap/schema/kerberos.schema.gz
 - name: Import kerberos schema
   shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.schema
+- name: Adding auth regex rewrite
+  ldap_attr:
+    dn: cn=config
+    name: olcAuthzRegexp
+    values: uid=([^,]*),cn=[^,]*,cn=auth uid=$1,ou=users,dc=home,dc=com
+    state: exact
 - name: Add krb5 index
   ldap_attr:
     dn: olcDatabase={1}mdb,cn=config
@@ -74,28 +83,29 @@
     name: olcAccess
     values:
       - >-
-       {0}to attrs=userPassword 
-       by self write 
-       by anonymous auth 
+       {0}to attrs=userPassword
+       by self write
+       by anonymous auth
        by * none
       - >-
        {1}to attrs=shadowLastChange
        by self write
        by * read
       - >-
-       {2}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
-       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
-       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
-       by * none
-      - >-
-       {3}to attrs=krbPrincipalKey
+       {2}to attrs=krbPrincipalKey
        by anonymous auth
        by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
        by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
        by self write
        by * none
+      - >-
+       {3}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by * none
       - >- 
        {4}to * 
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
        by * read
     state: exact
 - name: Set up krb5-KDC user
@@ -131,19 +141,19 @@
     owner: root
     group: root
     mode: '0644'
-- name: Create realm
-  shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees cn=krbContainer,{{ ldapBaseDN }} -P {{ krb5DBpw }} -r {{ krb5realm }} -s
 - name: Create service keyfile for krb5-kdc
   expect:
-    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile cn=krb5-kdc,{{ ldapBaseDN }}
+    command: kdb5_ldap_util stashsrvpw -f /etc/openldap.keyfile cn=krb5-kdc,{{ ldapBaseDN }}
     responses: 
      Password for (?i): "{{ ldapkdcpw }}"
      Re-enter password for (?i): "{{ ldapkdcpw }}"
 - name: Create service keyfile for krb5-admin
   expect:
-    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile cn=krb5-admin,{{ ldapBaseDN }}
+    command: kdb5_ldap_util stashsrvpw -f /etc/openldap.keyfile cn=krb5-admin,{{ ldapBaseDN }}
     responses: 
      Password for (?i): "{{ ldapkadminpw }}"
      Re-enter password for (?i): "{{ ldapkadminpw }}"
+- name: Create ldap container
+  shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees {{ ldapBaseDN }}  -P {{ krb5DBpw }} -r {{ krb5realm }} -s
 - name: Reload configs
   systemd: daemon_reload=yes

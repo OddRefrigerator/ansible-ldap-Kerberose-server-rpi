@@ -3,7 +3,7 @@ BASE	     {{ ldapBaseDN }}
 LDAP_VERSION 3
 BINDDN cn=admin,{{ ldapBaseDN }}
 BINDPW {{ ldapAdminpw }}
-URI ldapi:/// ldap://{{ hostName }}
+URI ldap://{{ hostName }}
 
 #SIZELIMIT	12
 #TIMELIMIT	15
