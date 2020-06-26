@@ -64,7 +64,7 @@
   ldap_attr:
     dn: cn=config
     name: olcAuthzRegexp
-    values: uid=([^,]*),cn=[^,]*,cn=auth uid=$1,ou=users,dc=home,dc=com
+    values: uid=([^,]*),cn=[^,]*,cn=auth uid=$1,ou=users,{{ ldapBaseDN }}
     state: exact
 - name: Add krb5 index
   ldap_attr:
