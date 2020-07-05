@@ -176,4 +176,4 @@ STREET  streetAddress
 DC      domainComponent
 UID     userid
 
-jop66I1t
+openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out /etc/ssl/ldap.crt -keyout /etc/ssl/private/ldap.pem

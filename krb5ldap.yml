@@ -11,6 +11,7 @@
     - libpam-ldap
     - schema2ldif 
     - slapd
+    - sasl2-bin
     - python3-ldap
     - python3-pexpect
 - name: Copy file ldap.conf with owner and permissions
@@ -64,7 +65,7 @@
   ldap_attr:
     dn: cn=config
     name: olcAuthzRegexp
-    values: uid=([^,]*),cn=[^,]*,cn=auth uid=$1,ou=users,{{ ldapBaseDN }}
+    values: uid=([^,]*),cn=[^,]*,cn=auth ldap:///ou=users,{{ ldapBaseDN }}??one?(uid=$1)
     state: exact
 - name: Add krb5 index
   ldap_attr:
@@ -86,6 +87,7 @@
        {0}to attrs=userPassword
        by self write
        by anonymous auth
+       by dn.exact="cn=krb5-admin,dc=home,dc=com" write
        by * none
       - >-
        {1}to attrs=shadowLastChange
@@ -94,20 +96,57 @@
       - >-
        {2}to attrs=krbPrincipalKey
        by anonymous auth
-       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" write
        by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
        by self write
        by * none
       - >-
        {3}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
-       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" write
        by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
        by * none
+      - >-
+       {4}to dn.subtree="ou=users,{{ ldapBaseDN }}"
+       by dn.exact="cn=kdc-service,dc=example,dc=com" write
+       by dn.exact="cn=adm-service,dc=example,dc=com" write
+       by * none
       - >- 
-       {4}to * 
-       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       {5}to * 
        by * read
     state: exact
+- name: Create groups ldap ou DN
+  ldap_entry:
+    dn: ou=groups,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: groups
+- name: Create users ldap ou DN
+  ldap_entry:
+    dn: ou=users,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: users
+- name: Create machines ldap ou DN
+  ldap_entry:
+    dn: ou=machines,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: machines        
 - name: Set up krb5-KDC user
   ldap_entry:
     dn: cn=krb5-kdc,{{ ldapBaseDN }}
@@ -152,8 +191,8 @@
     command: kdb5_ldap_util stashsrvpw -f /etc/openldap.keyfile cn=krb5-admin,{{ ldapBaseDN }}
     responses: 
      Password for (?i): "{{ ldapkadminpw }}"
-     Re-enter password for (?i): "{{ ldapkadminpw }}"
-- name: Create ldap container
-  shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees {{ ldapBaseDN }}  -P {{ krb5DBpw }} -r {{ krb5realm }} -s
+     Re-enter password for (?i): "{{ ldapkadminpw }}"   
+- name: Create ldap KRB5 container
+  shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees {{ ldapBaseDN }} -P {{ krb5DBpw }} -r {{ krb5realm }} -s
 - name: Reload configs
   systemd: daemon_reload=yes

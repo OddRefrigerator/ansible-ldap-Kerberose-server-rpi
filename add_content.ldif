@@ -17,7 +17,7 @@ dn: cn=ldapUser,ou=groups,dc=home,dc=com
 objectClass: posixGroup
 cn: netUser
 gidNumber: 10001
-description: Server group
+description: ldap user group
 
 dn: uid=pi,ou=users,dc=home,dc=com
 objectClass: top
@@ -26,13 +26,13 @@ objectClass: posixAccount
 objectClass: shadowAccount
 cn: pi
 uid: pi
-uidNumber: 10000
+uidNumber: 10001
 gidNumber: 10001
 homeDirectory: /home/pi
 loginShell: /bin/bash
+description: raspberry pi builtin account
 gecos: raspberry pi
-description: raspberry pi service account
-userPassword: {CRYPT}x
+userPassword: toor
 
 dn: uid=mediaPlayer,ou=users,dc=home,dc=com
 objectClass: top
@@ -45,8 +45,6 @@ uidNumber: 10002
 gidNumber: 10001
 homeDirectory: /home/mediaPlayer
 loginShell: /bin/bash
-gecos: mediaPlayer
 description: mediaPlayer service account
-userPassword: {CRYPT}x
-
-
+gecos: mediaPlayer 
+userPassword: mediaPlayer

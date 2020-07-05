@@ -4,19 +4,15 @@ include         /etc/ldap/schema/nis.schema
 include         /etc/ldap/schema/inetorgperson.schema
 include         /etc/ldap/schema/kerberos.schema
 
-pidfile         /var/run/slapd/slapd.pid
 argsfile        /var/run/slapd/slapd.args
+pidfile         /var/run/slapd/slapd.pid
 
-#sasl-realm {{ krb5realm|upper() }}
-#sasl-host {{ hostName }}
+sasl-host {{ hostName }}
+sasl-realm {{ krb5realm|upper() }}
 
 authz-policy from
 authz-regexp
   uid=([^,]*),cn=[^,]*,cn=auth
-  uid=$1,ou=users,dc=home,dc=com
-
-authz-regexp
-  uid=([^,]*),cn=auth
   uid=$1,ou=users,dc=home,dc=com
 
 access to attrs=userPassword,shadowLastChange
@@ -31,10 +27,11 @@ access to *
         by dn="cn=krb5-admin,{{ ldapBaseDN }}" write
         by * read
 
-password-hash {SSHA}
+password-hash {CLEARTEXT}
 loglevel        16384
 modulepath	/usr/lib/ldap
-moduleload	back_mdb
+moduleload	back_mdb.la
+moduleload	back_ldap.la
 sizelimit 500
 tool-threads 1
 
@@ -42,13 +39,12 @@ defaultsearchbase "{{ ldapBaseDN }}"
 
 backend         mdb
 database        mdb    
-suffix          "{{ ldapBaseDN }}" 
 directory       "/var/lib/ldap"
+suffix          "{{ ldapBaseDN }}" 
+
+lastmod         on
 
 index           objectClass eq
-lastmod         on
+index           uid,uidnumber,gidnumber,cn
+index           krb5PrincipalName,krb5PrincipalRealm
 checkpoint      512 30
-
-
-
-
