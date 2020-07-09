@@ -129,7 +129,7 @@
        {0}to attrs=userPassword
        by self write
        by anonymous auth
-       by dn.exact="cn=krb5-admin,dc=home,dc=com" write
+       by dn.exact="cn=krb5-admin,dc=home,dc=local" write
        by * none
       - >-
        {1}to attrs=shadowLastChange
@@ -149,8 +149,8 @@
        by * none
       - >-
        {4}to dn.subtree="ou=users,{{ ldapBaseDN }}"
-       by dn.exact="cn=kdc-service,dc=example,dc=com" write
-       by dn.exact="cn=adm-service,dc=example,dc=com" write
+       by dn.exact="cn=kdc-service,dc=example,dc=local" write
+       by dn.exact="cn=adm-service,dc=example,dc=local" write
        by * none
       - >- 
        {5}to * 

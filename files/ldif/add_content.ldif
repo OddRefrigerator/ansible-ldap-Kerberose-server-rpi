@@ -1,75 +1,75 @@
-dn: ou=Users,dc=home,dc=com
+dn: ou=Users,dc=home,dc=local
 objectClass: top
 objectClass: organizationalUnit
 ou: Users
 
-dn: ou=Groups,dc=home,dc=com
+dn: ou=Groups,dc=home,dc=local
 objectClass: top
 objectClass: organizationalUnit
 ou: Groups
 
-dn: ou=Machines,dc=home,dc=com
+dn: ou=Machines,dc=home,dc=local
 objectClass: top
 objectClass: organizationalUnit
 ou: Machines
 
-dn: ou=Idmap,dc=home,dc=com
+dn: ou=Idmap,dc=home,dc=local
 objectClass: organizationalUnit
 ou: Idmap
 
-dn: cn=Manager,dc=home,dc=com
+dn: cn=Manager,dc=home,dc=local
 objectclass: organizationalRole
 cn: Manager
 
-dn: cn=servers,ou=Groups,dc=home,dc=com
+dn: cn=servers,ou=Groups,dc=home,dc=local
 objectClass: posixGroup
 cn: servers
 gidNumber: 10002
 description: Group account
 
-dn: uid=srv1.home.com,ou=Machines,dc=home,dc=com
+dn: uid=srv1.home.local,ou=Machines,dc=home,dc=local
 objectClass: account
 objectClass: posixAccount
-cn: srv1.home.com
-uid: srv1.home.com
+cn: srv1.home.local
+uid: srv1.home.local
 uidNumber: 20000
 gidNumber: 10002
 homeDirectory: /dev/null
 loginShell: /bin/false
-gecos: srv1.home.com
+gecos: srv1.home.local
 description: Machine account
 
-dn: uid=auth.home.com,ou=Machines,dc=home,dc=com
+dn: uid=auth.home.local,ou=Machines,dc=home,dc=local
 objectClass: account
 objectClass: posixAccount
-cn: auth.home.com
-uid: auth.home.com
+cn: auth.home.local
+uid: auth.home.local
 uidNumber: 20001
 gidNumber: 10002
 homeDirectory: /dev/null
 loginShell: /bin/false
-gecos: auth.home.com
+gecos: auth.home.local
 description: Machine account
 
-dn: uid=steve-oldlaptop.home.com,ou=Machines,dc=home,dc=com
+dn: uid=steve-oldlaptop.home.local,ou=Machines,dc=home,dc=local
 objectClass: account
 objectClass: posixAccount
-cn: steve-oldlaptop.home.com
-uid: steve-oldlaptop.home.com
+cn: steve-oldlaptop.home.local
+uid: steve-oldlaptop.home.local
 uidNumber: 20002
 gidNumber: 10002
 homeDirectory: /dev/null
 loginShell: /bin/false
-gecos: steve-oldlaptop.home.com
+gecos: steve-oldlaptop.home.local
 description: Machine account
 
-dn: cn=ldapUsers,ou=Groups,dc=home,dc=com
+dn: cn=ldapUsers,ou=Groups,dc=home,dc=local
 objectClass: posixGroup
 cn: ldapUsers
 gidNumber: 10001
 description: ldap users
 
-dn: uid=pi,ou=Users,dc=home,dc=com
+dn: uid=pi,ou=Users,dc=home,dc=local
 objectClass: account
 objectClass: posixAccount
 uid: pi

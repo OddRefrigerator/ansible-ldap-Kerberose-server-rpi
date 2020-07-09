@@ -1,5 +1,5 @@
 #!/bin/bash
-export REALM="HOME.COM"
+export REALM="home.local"
 export krb5DBpw="password123"
 export krb5admpw="password123"
 export krb5kdcldap="password123"

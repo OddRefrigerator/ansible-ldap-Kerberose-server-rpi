@@ -1,4 +1,4 @@
 dn: cn=config
 changetype: modify
 add: olcAuthzRegexp
-olcAuthzRegexp:{0}"uid=([^,]*),cn=[^,]*,cn=auth" "uid=$1,ou=users,dc=home,dc=com"
+olcAuthzRegexp:{0}"uid=([^,]*),cn=[^,]*,cn=auth" "uid=$1,ou=users,dc=home,dc=local"

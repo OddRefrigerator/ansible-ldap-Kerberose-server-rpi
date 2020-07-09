@@ -1,4 +1,4 @@
-dn: uid=pi,dc=home,dc=com
+dn: uid=pi,dc=home,dc=local
 objectClass: account
 objectClass: simpleSecurityObject
 uid: pi

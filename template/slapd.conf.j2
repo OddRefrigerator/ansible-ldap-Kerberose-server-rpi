@@ -13,7 +13,7 @@ sasl-realm {{ krb5realm|upper() }}
 authz-policy from
 authz-regexp
   uid=([^,]*),cn=[^,]*,cn=auth
-  uid=$1,ou=users,dc=home,dc=com
+  uid=$1,ou=users,dc=home,dc=local
 
 access to attrs=userPassword,shadowLastChange
         by dn="cn=krb5-admin,{{ ldapBaseDN }}" write
