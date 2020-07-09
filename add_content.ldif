@@ -1,25 +1,25 @@
-dn: ou=groups,dc=home,dc=com
+dn: ou=groups,dc=home,dc=local
 objectClass: top
 objectClass: organizationalUnit
 ou: groups
 
-dn: ou=users,dc=home,dc=com
+dn: ou=users,dc=home,dc=local
 objectClass: top
 objectClass: organizationalUnit
 ou: users
 
-dn: ou=machines,dc=home,dc=com
+dn: ou=machines,dc=home,dc=local
 objectClass: top
 objectClass: organizationalUnit
 ou: machines
 
-dn: cn=ldapUser,ou=groups,dc=home,dc=com
+dn: cn=ldapUser,ou=groups,dc=home,dc=local
 objectClass: posixGroup
 cn: netUser
 gidNumber: 10001
 description: ldap user group
 
-dn: uid=pi,ou=users,dc=home,dc=com
+dn: uid=pi,ou=users,dc=home,dc=local
 objectClass: top
 objectClass: account
 objectClass: posixAccount
@@ -34,7 +34,7 @@ description: raspberry pi builtin account
 gecos: raspberry pi
 userPassword: toor
 
-dn: uid=mediaPlayer,ou=users,dc=home,dc=com
+dn: uid=mediaPlayer,ou=users,dc=home,dc=local
 objectClass: top
 objectClass: account
 objectClass: posixAccount

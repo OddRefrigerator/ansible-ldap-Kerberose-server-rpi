@@ -27,9 +27,9 @@ sasl-realm {{ krb5realm|upper() }}
 sasl-host {{ hostName }}
 
 authz-policy from
-authz-regexp "^uid=[^,/]+/admin,cn=home\.com,cn=gssapi,cn=auth" "cn=krbContainer,dc=home,dc=com"
-authz-regexp "^uid=host/([^,]+)\.home\.com,cn=home\.com,cn=gssapi,cn=auth" "cn=$1,ou=hosts,dc=home,dc=com"
-authz-regexp "^uid=([^,]+),cn=home\.com,cn=gssapi,cn=auth" "uid=$1,ou=users,dc=home,dc=com"
+authz-regexp "^uid=[^,/]+/admin,cn=home\.com,cn=gssapi,cn=auth" "cn=krbContainer,dc=home,dc=local"
+authz-regexp "^uid=host/([^,]+)\.home\.com,cn=home\.com,cn=gssapi,cn=auth" "cn=$1,ou=hosts,dc=home,dc=local"
+authz-regexp "^uid=([^,]+),cn=home\.com,cn=gssapi,cn=auth" "uid=$1,ou=users,dc=home,dc=local"
 
 loglevel        16384
 modulepath	/usr/lib/ldap
@@ -153,7 +153,7 @@ sasl-realm {{ krb5realm|upper() }}
 authz-policy from
 authz-regexp
   uid=([^,]*),cn=[^,]*,cn=auth
-  uid=$1,ou=users,dc=home,dc=com
+  uid=$1,ou=users,dc=home,dc=local
 
 >>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 access to attrs=userPassword,shadowLastChange

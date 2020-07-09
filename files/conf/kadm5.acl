@@ -6,5 +6,5 @@
 */admin *
 */manager *
 #CHANGE THIS--> realm should be set dynamicaly from ENV variable. sed subsition on deploy?
-*/*@HOME.COM  i
-*@HOME.COM    i
+*/*@home.local  i
+*@home.local    i

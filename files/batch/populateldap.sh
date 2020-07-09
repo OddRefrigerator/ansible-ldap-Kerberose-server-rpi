@@ -1,5 +1,5 @@
 #!/bin/bash
-export REALM="HOME.COM"
+export REALM="home.local"
 export krb5DBpw="password123"
 export krb5admpw="password123"
 export krb5kdcldap="password123"
@@ -24,24 +24,24 @@ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ../ldif/newPassword.ldif
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ../ldif/krb5Index.ldif -c
 sudo ldapadd -Q -Y EXTERNAL -H ldapi:/// -f ../ldif/krb5perms.ldif -c
 #CHANGE THIS--> Password should be set dynamicaly from ENV or prog var
-sudo ldapadd -x -D cn=admin,dc=home,dc=com -w $krb5admpw -H ldap://auth.home.com -f ../ldif/krb5admin.ldif -c
+sudo ldapadd -x -D cn=admin,dc=home,dc=local -w $krb5admpw -H ldap://auth.home.local -f ../ldif/krb5admin.ldif -c
 
 #Set password and stash in service.kefile
 #CHANGE THIS--> Password should be set dynamicaly from ENV or prog var
-sudo ldappasswd -x -D cn=admin,dc=home,dc=com -w $krb5admpw -s $krb5kdcldap uid=kdc-service,dc=home,dc=com
+sudo ldappasswd -x -D cn=admin,dc=home,dc=local -w $krb5admpw -s $krb5kdcldap uid=kdc-service,dc=home,dc=local
 #CHANGE THIS--> Password should be set dynamicaly from ENV or prog var
-sudo ldappasswd -x -D cn=admin,dc=home,dc=com -w $krb5admpw -s $krb5kdcldap uid=kadmin-service,dc=home,dc=com
+sudo ldappasswd -x -D cn=admin,dc=home,dc=local -w $krb5admpw -s $krb5kdcldap uid=kadmin-service,dc=home,dc=local
 #CHANGE THIS--> no current option to script password input
-sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kdc-service,dc=home,dc=com
-sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kadmin-service,dc=home,dc=com
+sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kdc-service,dc=home,dc=local
+sudo kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kadmin-service,dc=home,dc=local
 sudo systemctl restart slapd
 
 #Create krb5 container
 sudo sed -i 's/#database_module = openldap_ldapconf/database_module = openldap_ldapconf/g' /etc/krb5.conf
 #CHANGE THIS--> Password should be set dynamicaly from ENV or prog var
-sudo kdb5_ldap_util -D cn=admin,dc=home,dc=com -w $krb5admpw -H ldap://auth.home.com create -subtrees cn=krbContainer,dc=home,dc=com -P $krb5DBpw -r $REALM -s
+sudo kdb5_ldap_util -D cn=admin,dc=home,dc=local -w $krb5admpw -H ldap://auth.home.local create -subtrees cn=krbContainer,dc=home,dc=local -P $krb5DBpw -r $REALM -s
 
 #Create krb5 default contaners
-sudo ldapadd -x -D uid=kdc-service,dc=home,dc=com -w $krb5kdcldap -H ldap://auth.home.com -f ../ldif/krb5Containers.ldif -c
-ldapsearch -x -D uid=kdc-service,dc=home,dc=com -w $krb5kdcldap -H ldap://auth.home.com
+sudo ldapadd -x -D uid=kdc-service,dc=home,dc=local -w $krb5kdcldap -H ldap://auth.home.local -f ../ldif/krb5Containers.ldif -c
+ldapsearch -x -D uid=kdc-service,dc=home,dc=local -w $krb5kdcldap -H ldap://auth.home.local
 
