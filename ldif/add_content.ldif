@@ -1,0 +1,96 @@
+dn: ou=Machines,dc=home,dc=local
+objectClass: organizationalUnit
+ou: Machines
+
+dn: ou=Groups,dc=home,dc=local
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=Users,dc=home,dc=local
+objectClass: organizationalUnit
+ou: Users
+
+dn: cn=ldapUsers,ou=Groups,dc=home,dc=local
+objectClass: posixGroup
+cn: ldapUsers
+gidNumber: 10001
+description: ldap users
+
+dn: uid=steve,ou=Users,dc=home,dc=local
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: inetOrgPerson
+uid: steve
+sn: ancliffe
+givenName: Stephen Ancliffe
+cn: Stephen Ancliffe
+displayName: Stephen Ancliffe
+uidNumber: 10000
+gidNumber: 10001
+userPassword: password123
+gecos: Stephen Ancliffe
+loginShell: /bin/bash
+homeDirectory: /home/steve
+description: My ldap account
+
+dn: uid=pi,ou=Users,dc=home,dc=local
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: inetOrgPerson
+uid: pi
+sn: raspberry
+givenName: raspberry pi
+cn: raspberry pi
+displayName: raspberry pi
+uidNumber: 10000
+gidNumber: 10001
+userPassword: password123
+gecos: raspberry pi
+loginShell: /bin/bash
+homeDirectory: /home/pi
+description: raspberry pi service account
+
+dn: cn=servers,ou=Groups,dc=home,dc=local
+objectClass: posixGroup
+cn: servers
+gidNumber: 10002
+description: Group account
+
+dn: uid=srv1.home.local,ou=Machines,dc=home,dc=local
+objectClass: account
+objectClass: posixAccount
+cn: srv1.home.local
+uid: srv1.home.local
+uidNumber: 20000
+gidNumber: 10002
+homeDirectory: /dev/null
+loginShell: /bin/false
+gecos: srv1.home.local
+description: Machine account
+
+dn: uid=kdc.home.local,ou=Machines,dc=home,dc=local
+objectClass: account
+objectClass: posixAccount
+cn: kdc.home.local
+uid: kdc.home.local
+uidNumber: 20001
+gidNumber: 10002
+homeDirectory: /dev/null
+loginShell: /bin/false
+gecos: kdc.home.local
+description: Machine account
+
+dn: uid=steve-oldlaptop.home.local,ou=Machines,dc=home,dc=local
+objectClass: account
+objectClass: posixAccount
+cn: steve-oldlaptop.home.local
+uid: steve-oldlaptop.home.local
+uidNumber: 20002
+gidNumber: 10002
+homeDirectory: /dev/null
+loginShell: /bin/false
+gecos: steve-oldlaptop.home.local
+description: Machine account
+

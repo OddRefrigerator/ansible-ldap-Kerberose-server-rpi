@@ -1,4 +1,4 @@
-dn: uid=piadm,dc=home,dc=com
+dn: uid=piadm,dc=home,dc=local
 objectClass: account
 objectClass: simpleSecurityObject
 uid: piadm
