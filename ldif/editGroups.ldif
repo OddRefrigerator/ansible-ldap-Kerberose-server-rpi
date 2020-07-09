@@ -1,0 +1,6 @@
+dn: cn=ldapUsers,ou=Groups,dc=home,dc=local
+changetype: modify
+replace: gidNumber
+gidNumber: 10001
+
+

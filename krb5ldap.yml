@@ -4,12 +4,29 @@
   apt:
     pkg:
     - krb5-kdc-ldap
+<<<<<<< HEAD
+    - ldap-utils 
+<<<<<<< HEAD
+<<<<<<< HEAD
+    - libnss-ldapd
+    - ldapscripts 
+=======
+    - libnss-ldapd 
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+=======
     - ldap-utils
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
     - libnss-ldapd
     - libsasl2-modules-ldap
     - libsasl2-modules-gssapi-mit
     - libpam-ldap
+<<<<<<< HEAD
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
+    - schema2ldif 
+=======
     - schema2ldif
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
     - slapd
     - sasl2-bin
     - python3-ldap
@@ -51,16 +68,170 @@
     state: exact
 - name: Copy schema to /etc/ldap/schema/
   copy:
+<<<<<<< HEAD
+<<<<<<< HEAD
     src: /usr/share/doc/krb5-kdc-ldap/kerberos.schema.gz
+=======
+    src: /usr/share/doc/krb5-kdc-ldap/kerberos.openldap.ldif.gz
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+    src: /usr/share/doc/krb5-kdc-ldap/kerberos.schema.gz
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
     dest: /etc/ldap/schema/
     remote_src: yes
     owner: root
     group: root
     mode: '0644'
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 - name: Extract kerberos.schema.gz into /etc/ldap/schema/
   shell: gunzip -f /etc/ldap/schema/kerberos.schema.gz
 - name: Import kerberos schema
   shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.schema
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+- name: Extract kerberos.openldap.ldif.gz into /etc/ldap/schema/
+  shell: gunzip /etc/ldap/schema/kerberos.openldap.ldif.gz
+- name: Import kerberos schema
+  shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.openldap.ldif
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+- name: Adding auth regex rewrite
+  ldap_attr:
+    dn: cn=config
+    name: olcAuthzRegexp
+    values: uid=([^,]*),cn=[^,]*,cn=auth ldap:///ou=users,{{ ldapBaseDN }}??one?(uid=$1)
+    state: exact
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
+- name: Add krb5 index
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcDbIndex
+    values: 
+    - objectClass eq
+    - cn,uid eq
+    - uidNumber,gidNumber eq
+    - member,memberUid eq
+    - krbPrincipalName eq,pres,sub
+    state: exact
+<<<<<<< HEAD
+<<<<<<< HEAD
+- name: Set up krb5 kdc user
+  ldap_entry:
+    dn: cn=krb5-kdc,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      cn: krb5-kdc
+      description: KDC service account
+      userPassword: "{{ ldapAdminpwPlain }}"
+- name: Set up krb5 admin user
+  ldap_entry:
+    dn: cn=krb5-admin,{{ ldapBaseDN }}
+    server_uri: ldap://{{ krb5KDCSrv }}/
+    bind_dn: cn=admin,{{ ldapBaseDN }}
+    bind_pw: "{{ ldapAdminpwPlain }}"
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      cn: krb5-admin
+      description: KDC admin service account
+      userPassword: "{{ ldapAdminpwPlain }}"
+=======
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
+- name: Set up the krb5 ACL 
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcAccess
+    values:
+      - >-
+       {0}to attrs=userPassword
+       by self write
+       by anonymous auth
+       by dn.exact="cn=krb5-admin,dc=home,dc=local" write
+       by * none
+      - >-
+       {1}to attrs=shadowLastChange
+       by self write
+       by * read
+      - >-
+<<<<<<< HEAD
+<<<<<<< HEAD
+       {2}to attrs=krbPrincipalKey
+       by anonymous auth
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by self write
+       by * none
+      - >-
+       {3}to dn.subtree="{{ ldapBaseDN }}"
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by dn.exact="cn=admin,{{ ldapBaseDN }}" write
+       by * none
+      - >-
+       {4}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" read
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by dn.exact="cn=admin,{{ ldapBaseDN }}" write
+       by * none
+      - >- 
+       {5}to * 
+       by * read
+    state: exact
+- name: create service keyfile for admin
+  expect:
+    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile cn=krb5-admin,{{ ldapBaseDN }}
+    responses: 
+     Password for (?i): "{{ ldapkadminpw }}"
+     Re-enter password for (?i): "{{ ldapkadminpw }}"
+- name: create service keyfile for KDC
+  expect:
+    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile cn=krb5-kdc,{{ ldapBaseDN }}
+    responses: 
+     Password for (?i): "{{ ldapkdcpw }}"
+     Re-enter password for (?i): "{{ ldapkdcpw }}"
+=======
+       {2}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+       by dn.exact="uid=kdc-service,{{ ldapBaseDN }}" write
+       by dn.exact="uid=kadmin-service,{{ ldapBaseDN }}" write
+       by dn.exact="cn=admin,{{ ldapBaseDN }}" write
+       by * none
+      - >-
+       {3}to attrs=krbPrincipalKey
+=======
+       {2}to attrs=krbPrincipalKey
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
+       by anonymous auth
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" write
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by self write
+       by * none
+      - >-
+       {3}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" write
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by * none
+      - >-
+       {4}to dn.subtree="ou=users,{{ ldapBaseDN }}"
+       by dn.exact="cn=kdc-service,dc=example,dc=local" write
+       by dn.exact="cn=adm-service,dc=example,dc=local" write
+       by * none
+      - >- 
+       {5}to * 
+       by * read
+    state: exact
+=======
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
 - name: Create groups ldap ou DN
   ldap_entry:
     dn: ou=groups,{{ ldapBaseDN }}
@@ -120,6 +291,29 @@
       cn: krb5-admin
       description: krb5-admin service account
       userPassword: "{{ ldapAdminpwPlain }}"
+<<<<<<< HEAD
+<<<<<<< HEAD
+- name: create service keyfile for kdc
+  expect:
+    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kdc-service,{{ ldapBaseDN }}
+    responses: 
+     Password for (?i): "{{ ldapkdcpw }}"
+     Re-enter password for (?i): "{{ ldapkdcpw }}"
+- name: create service keyfile for admin
+  expect:
+    command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kadmin-service,{{ ldapBaseDN }}
+    responses: 
+     Password for (?i): "{{ ldapkadminpw }}"
+     Re-enter password for (?i): "{{ ldapkadminpw }}"
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+- name: restart slapd
+  service:
+    name: slapd
+    state: restarted 
+    enabled: yes
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
+=======
 - name: Set up the krb5 ACL 
   ldap_attr:
     dn: olcDatabase={1}mdb,cn=config
@@ -173,6 +367,7 @@
     name: olcAuthzRegexp
     values: uid=([^,]*),cn=[^,]*,cn=auth ldap:///ou=users,{{ ldapBaseDN }}??one?(uid=$1)
     state: exact
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
 - name: Copy file krb5.conf with new ldap settings
   template:
     src: template/krb5.conf.ldap.j2
@@ -180,6 +375,22 @@
     owner: root
     group: root
     mode: '0644'
+<<<<<<< HEAD
+- name: Create realm
+  shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees cn=krbContainer,{{ ldapBaseDN }} -P {{ krb5DBpw }} -r {{ krb5realm }} -s
+<<<<<<< HEAD
+- name: Copy file ldapscripts.conf 
+  template:
+    src: template/ldapscripts.conf.j2
+    dest: /etc/ldapscripts/ldapscripts.conf
+    owner: root
+    group: root
+    mode: '0400'
+- name: set ldap scripts password 
+  shell: sh -c "echo -n '{{ ldapAdminpwPlain }}' > /etc/ldapscripts/ldapscripts.passwd"
+=======
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
 - name: Create service keyfile for krb5-kdc
   expect:
     command: kdb5_ldap_util stashsrvpw -f /etc/openldap.keyfile cn=krb5-kdc,{{ ldapBaseDN }}
@@ -196,3 +407,4 @@
   shell: kdb5_ldap_util -D cn=admin,{{ ldapBaseDN }} -w {{ ldapAdminpwPlain }} -H ldap://{{ hostName }} create -subtrees {{ ldapBaseDN }} -P {{ krb5DBpw }} -r {{ krb5realm }} -s
 - name: Reload configs
   systemd: daemon_reload=yes
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e

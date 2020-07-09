@@ -1,9 +1,22 @@
 [logging]
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
  default = FILE:/var/lib/krb5kdc/krb5-default.log
  kdc = CONSOLE
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
  kdc = FILE:/var/lib/krb5kdc/krb5-kdc.log
  admin_server = CONSOLE
  admin_server = FILE:/var/lib/krb5kdc/krb5-admin.log
+<<<<<<< HEAD
+ default = FILE:/var/lib/krb5kdc/krb5-libs.log
+=======
+ default = FILE:/var/lib/krb5kdc/krb5libs.log
+ kdc = FILE:/var/lib/krb5kdc/krb5kdc.log
+ admin_server = FILE:/var/lib/krb5kdc/kadmind.log
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 
 [libdefaults]
  default_realm = {{ krb5realm|upper() }}

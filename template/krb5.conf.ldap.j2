@@ -1,3 +1,22 @@
+<<<<<<< HEAD
+[logging]
+<<<<<<< HEAD
+ kdc = CONSOLE
+ kdc = FILE:/var/lib/krb5kdc/krb5-kdc.log
+ admin_server = CONSOLE
+ admin_server = FILE:/var/lib/krb5kdc/krb5-admin.log
+ default = FILE:/var/lib/krb5kdc/krb5-default.log
+
+[dbdefaults]
+  ldap_kerberos_container_dn = "cn=krbContainer,{{ ldapBaseDN }}"
+=======
+ default = FILE:/var/lib/krb5kdc/krb5libs.log
+ kdc = FILE:/var/lib/krb5kdc/krb5kdc.log
+ admin_server = FILE:/var/lib/krb5kdc/kadmind.log
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 [libdefaults]
   default_realm = {{ krb5realm|upper() }}
   dns_lookup_kdc = true
@@ -19,6 +38,27 @@
 		
 [dbmodules] 
  openldap_ldapconf = {
+<<<<<<< HEAD
+     db_library = kldap
+     disable_last_success = true
+     disable_lockout = true
+<<<<<<< HEAD
+     ldap_kdc_dn = "cn=krb5-kdc,{{ ldapBaseDN }}"
+     ldap_kadmind_dn = "cn=krb5-admin,{{ ldapBaseDN }}"
+     ldap_servers = ldapi:///
+     ldap_service_password_file = /etc/krb5kdc/ldapservice.keyfile
+     ldap_conns_per_server = 5
+  }
+=======
+     ldap_kdc_dn = "cn=kdc-service,{{ ldapBaseDN }}"
+     ldap_kadmind_dn = "cn=kadmin-service,{{ ldapBaseDN }}"
+     ldap_kerberos_container_dn = "cn=krbContainer,{{ ldapBaseDN }}"
+     ldap_servers = ldap://{{ hostName }}
+     ldap_service_password_file = /etc/krb5kdc/ldapservice.keyfile
+     ldap_conns_per_server = 5
+    }
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
    db_library = kldap
    disable_last_success = true
    disable_lockout = true
@@ -29,3 +69,4 @@
    ldap_service_password_file = /etc/openldap.keyfile
    ldap_conns_per_server = 5
   }
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e

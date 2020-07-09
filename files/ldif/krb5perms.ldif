@@ -4,7 +4,14 @@ add: olcAccess
 olcAccess: {2} to dn.subtree="cn=krbContainer,dc=home,dc=local"
   by dn.exact="uid=kdc-service,dc=home,dc=local" write
   by dn.exact="uid=kadmin-service,dc=home,dc=local" write
+<<<<<<< HEAD
   by dn.exact="cn=admin,dc=home,dc=local" write
+=======
+<<<<<<< HEAD
+  by dn.exact="cn=admin,dc=home,dc=local" write
+=======
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
+>>>>>>> 979acaf8413c01245dfe694ad23acdb2c5e51764
   by * none
 -
 add: olcAccess

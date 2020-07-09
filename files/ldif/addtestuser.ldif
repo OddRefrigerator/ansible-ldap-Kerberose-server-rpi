@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 dn: uid=pi,dc=home,dc=local
+=======
+<<<<<<< HEAD
+dn: uid=pi,dc=home,dc=local
+=======
+dn: uid=piadm,dc=home,dc=local
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
+>>>>>>> 979acaf8413c01245dfe694ad23acdb2c5e51764
 objectClass: account
 objectClass: simpleSecurityObject
 uid: pi
