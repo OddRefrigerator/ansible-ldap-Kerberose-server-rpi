@@ -1,2 +1,2 @@
-# ansible-ldap-Kerberose-server-rpi
-Work in progress. Currently learning LDAP + Kerberos + Ansibe
+# ansible-bind9-dns-forward-role-rpi
+ansible playbook to install bind9 on Raspbian for home DNS

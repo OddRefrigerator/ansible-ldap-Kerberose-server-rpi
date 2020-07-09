@@ -2,8 +2,9 @@
  # Requires: python3-ldap for ansible ldap module and expect 5.X for automation
 - name: Install ldap server packages
   apt:
-    pkg: 
+    pkg:
     - krb5-kdc-ldap
+<<<<<<< HEAD
     - ldap-utils 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -13,12 +14,19 @@
     - libnss-ldapd 
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
 =======
+=======
+    - ldap-utils
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
     - libnss-ldapd
     - libsasl2-modules-ldap
     - libsasl2-modules-gssapi-mit
     - libpam-ldap
+<<<<<<< HEAD
 >>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
     - schema2ldif 
+=======
+    - schema2ldif
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
     - slapd
     - sasl2-bin
     - python3-ldap
@@ -82,6 +90,7 @@
   shell: gunzip -f /etc/ldap/schema/kerberos.schema.gz
 - name: Import kerberos schema
   shell: ldap-schema-manager -i /etc/ldap/schema/kerberos.schema
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 - name: Extract kerberos.openldap.ldif.gz into /etc/ldap/schema/
@@ -221,6 +230,8 @@
        {5}to * 
        by * read
     state: exact
+=======
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
 - name: Create groups ldap ou DN
   ldap_entry:
     dn: ou=groups,{{ ldapBaseDN }}
@@ -281,6 +292,7 @@
       description: krb5-admin service account
       userPassword: "{{ ldapAdminpwPlain }}"
 <<<<<<< HEAD
+<<<<<<< HEAD
 - name: create service keyfile for kdc
   expect:
     command: kdb5_ldap_util stashsrvpw -f /etc/krb5kdc/ldapservice.keyfile uid=kdc-service,{{ ldapBaseDN }}
@@ -301,6 +313,61 @@
     enabled: yes
 =======
 >>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
+=======
+- name: Set up the krb5 ACL 
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcAccess
+    values:
+      - >-
+       {0}to attrs=userPassword
+       by self write
+       by anonymous auth
+       by dn.exact="cn=krb5-admin,dc=home,dc=com" write
+       by * none
+      - >-
+       {1}to attrs=shadowLastChange
+       by self write
+       by * read
+      - >-
+       {2}to attrs=krbPrincipalKey
+       by anonymous auth
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" write
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by self write
+       by * none
+      - >-
+       {3}to dn.subtree="cn=krbContainer,{{ ldapBaseDN }}"
+       by dn.exact="cn=krb5-kdc,{{ ldapBaseDN }}" write
+       by dn.exact="cn=krb5-admin,{{ ldapBaseDN }}" write
+       by * none
+      - >-
+       {4}to dn.subtree="ou=users,{{ ldapBaseDN }}"
+       by dn.exact="cn=kdc-service,dc=example,dc=com" write
+       by dn.exact="cn=adm-service,dc=example,dc=com" write
+       by * none
+      - >- 
+       {5}to * 
+       by * read
+    state: exact
+- name: Add krb5 index
+  ldap_attr:
+    dn: olcDatabase={1}mdb,cn=config
+    name: olcDbIndex
+    values: 
+    - objectClass eq
+    - cn,uid eq
+    - uidNumber,gidNumber eq
+    - member,memberUid eq
+    - krbPrincipalName eq,pres,sub
+    state: exact
+- name: Adding auth regex rewrite
+  ldap_attr:
+    dn: cn=config
+    name: olcAuthzRegexp
+    values: uid=([^,]*),cn=[^,]*,cn=auth ldap:///ou=users,{{ ldapBaseDN }}??one?(uid=$1)
+    state: exact
+>>>>>>> 73a6518296c6a27dd3f1c3e864bd1981a6ba5b2a
 - name: Copy file krb5.conf with new ldap settings
   template:
     src: template/krb5.conf.ldap.j2
