@@ -1,0 +1,17 @@
+sudo ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW | tee ../ldif/newpasswd.ldif
+export slapAdmin=password123
+sudo slappasswd -s $slapAdmin -h {SSHA} > slapAdminSSH.txt
+sed -i -e '/oldPassword/{r slapAdminSSH.txt' -e 'd}' newPassword.ldif
+
+sed -i -e '/oldPassword/{r slapAdminSSH.txt }' newPassword.ldif
+
+sed /oldPassword/r cat slapAdminSSH.txt ../ldif/newPassword.ldif
+sed -e s/oldPassword/{SSHA}RalUBvyTlcl6NPc29YZ8EQsUu34XnCuc/g ../ldif/newPassword.ldif
+cat newPassword.ldif | xargs -i sed 's/olcRootPW: oldPassword/{}/' newPassword.ldif
+
+cat newPassword.ldif | sed -e 's/olcRootPW: oldPassword/olcRootPW: {R slapAdminSSH.txt}/g' 
+
+pass=$(sudo slappasswd -s $slapAdmin -h {SSHA})
+sed -r "s/olcRootPW: oldPassword/olcRootPW: $pass/g" ../ldif/newPassword.ldif
+
+sed -r "s/olcRootPW: oldPassword/olcRootPW: $pass/g" ../ldif/newPassword.ldif

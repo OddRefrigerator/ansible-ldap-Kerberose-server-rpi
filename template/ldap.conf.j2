@@ -16,7 +16,11 @@ URI ldap://{{ hostName }}
 #DEREF		never
 
 # TLS certificates (needed for GnuTLS)
+<<<<<<< HEAD
 #TLS_CACERT	/etc/ssl/certs/ldap.crt
+=======
+# TLS_CACERT	/etc/ssl/certs/ldap.crt
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
 SASL_MECH GSSAPI
 SASL_REALM {{ krb5realm }}
 krb5_ccname /var/run/nslcd/nslcd.tkt

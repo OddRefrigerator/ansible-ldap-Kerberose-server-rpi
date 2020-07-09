@@ -1,0 +1,19 @@
+[libdefaults]
+ dns_lookup_realm = true
+ dns_lookup_kdc = true
+ default_realm = HOME.COM
+ ticket_lifetime = 24h
+ rdns = false
+ renew_lifetime = 7d
+ forwardable = true
+ 
+[realms]
+  HOME.COM = {
+   kdc = auth.home.com
+   admin_server = auth.home.com
+  }
+
+[domain_realm]
+  .home.com = HOME.COM
+  home.com = HOME.COM
+

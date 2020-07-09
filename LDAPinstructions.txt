@@ -174,4 +174,8 @@ OU      organizationalUnitName
 C       countryName
 STREET  streetAddress
 DC      domainComponent
+<<<<<<< HEAD
 UID     userid
+=======
+UID     userid
+>>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
