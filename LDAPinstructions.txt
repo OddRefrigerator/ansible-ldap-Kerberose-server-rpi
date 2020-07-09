@@ -175,7 +175,13 @@ C       countryName
 STREET  streetAddress
 DC      domainComponent
 <<<<<<< HEAD
+<<<<<<< HEAD
 UID     userid
 =======
 UID     userid
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+UID     userid
+
+openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out /etc/ssl/ldap.crt -keyout /etc/ssl/private/ldap.pem
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e

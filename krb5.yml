@@ -36,7 +36,7 @@
     mode: '0644'
 - name: Create realm
   shell: kdb5_util create -s -r {{ krb5realm }} -P {{ krb5DBpw }}
-- name: start KDC 
+- name: start KDC server
   service:
     name: krb5-kdc 
     state: restarted 

@@ -1,9 +1,3 @@
-#
-# LDAP Defaults
-#
-# See ldap.conf(5) for details
-# This file should be world readable but not world writable.
-
 HOST         {{ hostName }}
 BASE	     {{ ldapBaseDN }}
 LDAP_VERSION 3
@@ -17,10 +11,14 @@ URI ldap://{{ hostName }}
 
 # TLS certificates (needed for GnuTLS)
 <<<<<<< HEAD
+<<<<<<< HEAD
 #TLS_CACERT	/etc/ssl/certs/ldap.crt
 =======
 # TLS_CACERT	/etc/ssl/certs/ldap.crt
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+TLS_CACERT	/etc/ssl/certs/ca-certificates.crt
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 SASL_MECH GSSAPI
-SASL_REALM {{ krb5realm }}
+SASL_REALM {{ krb5realm|upper() }}
 krb5_ccname /var/run/nslcd/nslcd.tkt

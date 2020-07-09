@@ -1,28 +1,34 @@
 [logging]
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+ default = FILE:/var/lib/krb5kdc/krb5-default.log
+ kdc = CONSOLE
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
  kdc = FILE:/var/lib/krb5kdc/krb5-kdc.log
+ admin_server = CONSOLE
  admin_server = FILE:/var/lib/krb5kdc/krb5-admin.log
+<<<<<<< HEAD
  default = FILE:/var/lib/krb5kdc/krb5-libs.log
 =======
  default = FILE:/var/lib/krb5kdc/krb5libs.log
  kdc = FILE:/var/lib/krb5kdc/krb5kdc.log
  admin_server = FILE:/var/lib/krb5kdc/kadmind.log
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 
 [libdefaults]
+ default_realm = {{ krb5realm|upper() }}
  dns_lookup_realm = true
  dns_lookup_kdc = true
- default_realm = {{ krb5realm|upper() }}
- ticket_lifetime = 24h
  rdns = false
- renew_lifetime = 7d
- forwardable = true
- 
+
 [realms]
-	{{ krb5realm|upper() }} = {
-		kdc = {{ krb5KDCSrv|lower }}
-		admin_server = {{ krb5AdminSrv|lower }}
-	}
+{{ krb5realm|upper() }} = {
+  kdc = {{ krb5KDCSrv|lower }}
+  admin_server = {{ krb5AdminSrv|lower }}
+}
 
 [domain_realm]
  .{{ krb5realm|lower }} = {{ krb5realm|upper() }}

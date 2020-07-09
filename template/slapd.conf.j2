@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 # This is the main slapd configuration file. See slapd.conf(5) for more
 # info on the configuration options.
@@ -8,10 +9,13 @@
 
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
 # Schema and objectClass definitions
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 include         /etc/ldap/schema/core.schema
 include         /etc/ldap/schema/cosine.schema
 include         /etc/ldap/schema/nis.schema
 include         /etc/ldap/schema/inetorgperson.schema
+<<<<<<< HEAD
 include         /etc/ldap/schema/kerberose.schema
 
 <<<<<<< HEAD
@@ -39,9 +43,12 @@ backend		@BACKEND@
 # Where the pid file is put. The init.d script
 # will not stop the server if you change this.
 pidfile         /var/run/slapd/slapd.pid
+=======
+include         /etc/ldap/schema/kerberos.schema
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 
-# List of arguments that were passed to the server
 argsfile        /var/run/slapd/slapd.args
+<<<<<<< HEAD
 
 # Read slapd.conf(5) for possible values
 loglevel        none
@@ -137,12 +144,25 @@ checkpoint      512 30
 # admin entry below
 # These access lines apply to database #1 only
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+pidfile         /var/run/slapd/slapd.pid
+
+sasl-host {{ hostName }}
+sasl-realm {{ krb5realm|upper() }}
+
+authz-policy from
+authz-regexp
+  uid=([^,]*),cn=[^,]*,cn=auth
+  uid=$1,ou=users,dc=home,dc=com
+
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 access to attrs=userPassword,shadowLastChange
-        by dn="@ADMIN@" write
+        by dn="cn=krb5-admin,{{ ldapBaseDN }}" write
         by anonymous auth
         by self write
         by * none
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 access to dn.base="" by * read
 
@@ -159,26 +179,38 @@ access to *
 # are wont to do you'll still need this if you
 # want SASL (and possible other things) to work 
 # happily.
+=======
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e
 access to dn.base="" by * read
 
-# The admin dn has full write access, everyone else
-# can read everything.
 access to *
-        by dn="@ADMIN@" write
+        by dn="cn=krb5-admin,{{ ldapBaseDN }}" write
         by * read
 
-# For Netscape Roaming support, each user gets a roaming
-# profile for which they have write access to
-#access to dn=".*,ou=Roaming,o=morsnet"
-#        by dn="@ADMIN@" write
-#        by dnattr=owner write
+password-hash {CLEARTEXT}
+loglevel        16384
+modulepath	/usr/lib/ldap
+moduleload	back_mdb.la
+moduleload	back_ldap.la
+sizelimit 500
+tool-threads 1
 
-#######################################################################
-# Specific Directives for database #2, of type 'other' (can be @BACKEND@ too):
-# Database specific directives apply to this databasse until another
-# 'database' directive occurs
-#database        <other>
+defaultsearchbase "{{ ldapBaseDN }}"
 
+<<<<<<< HEAD
 # The base of your directory for database #2
 #suffix		"dc=debian,dc=org"
 >>>>>>> bd68b0b095917e9c0e1e44eaceb6b4742cfb93d0
+=======
+backend         mdb
+database        mdb    
+directory       "/var/lib/ldap"
+suffix          "{{ ldapBaseDN }}" 
+
+lastmod         on
+
+index           objectClass eq
+index           uid,uidnumber,gidnumber,cn
+index           krb5PrincipalName,krb5PrincipalRealm
+checkpoint      512 30
+>>>>>>> 4f9ff34c70c9a5d8400cca204489b1f24fe9848e

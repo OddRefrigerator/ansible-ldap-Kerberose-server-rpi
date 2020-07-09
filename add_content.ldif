@@ -13,47 +13,38 @@ objectClass: top
 objectClass: organizationalUnit
 ou: machines
 
-dn: cn=servers,ou=groups,dc=home,dc=com
-objectClass: posixGroup
-cn: servers
-gidNumber: 10001
-description: Server group
-
-dn: cn=netUser,ou=groups,dc=home,dc=com
+dn: cn=ldapUser,ou=groups,dc=home,dc=com
 objectClass: posixGroup
 cn: netUser
-gidNumber: 10002
-description: Server group
+gidNumber: 10001
+description: ldap user group
 
 dn: uid=pi,ou=users,dc=home,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: pi
 uid: pi
 uidNumber: 10001
-gidNumber: 10002
-cn: pi
-sn: pi
-objectClass: top
-objectClass: person
-objectClass: posixAccount
-objectClass: shadowAccount
-loginShell: /bin/bash
+gidNumber: 10001
 homeDirectory: /home/pi
-userPassword: {CRYPT}*
+loginShell: /bin/bash
+description: raspberry pi builtin account
 gecos: raspberry pi
-description: raspberry pi service account
+userPassword: toor
 
-dn: uid=kodi,ou=users,dc=home,dc=com
-uid: kodi
-uidNumber: 10002
-gidNumber: 10002
-cn: kodi
-sn: kodi
+dn: uid=mediaPlayer,ou=users,dc=home,dc=com
 objectClass: top
-objectClass: person
+objectClass: account
 objectClass: posixAccount
 objectClass: shadowAccount
+cn: mediaPlayer
+uid: mediaPlayer
+uidNumber: 10002
+gidNumber: 10001
+homeDirectory: /home/mediaPlayer
 loginShell: /bin/bash
-homeDirectory: /home/kodi
-userPassword: {CRYPT}*
-gecos: kodi
-description: kodi service account
-
+description: mediaPlayer service account
+gecos: mediaPlayer 
+userPassword: mediaPlayer

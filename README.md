@@ -1,3 +1,2 @@
 # ansible-ldap-Kerberose-server-rpi
-Ansible setup for ldap with krb5 on raspberry pi running Raspbian Buster (work in progress) 
-NO TLS/SSL. 
+Work in progress. Currently learning LDAP + Kerberos + Ansibe
