@@ -1,0 +1,14 @@
+dn: ou=Groups,cn=HOME.COM,cn=krbContainer,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=Users,cn=HOME.COM,cn=krbContainer,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: Users
+
+dn: ou=Machines,cn=HOME.COM,cn=krbContainer,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: Machines

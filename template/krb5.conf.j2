@@ -1,0 +1,22 @@
+[logging]
+ default = FILE:/var/lib/krb5kdc/krb5-default.log
+ kdc = CONSOLE
+ kdc = FILE:/var/lib/krb5kdc/krb5-kdc.log
+ admin_server = CONSOLE
+ admin_server = FILE:/var/lib/krb5kdc/krb5-admin.log
+
+[libdefaults]
+ default_realm = {{ krb5realm|upper() }}
+ dns_lookup_realm = true
+ dns_lookup_kdc = true
+ rdns = false
+
+[realms]
+{{ krb5realm|upper() }} = {
+  kdc = {{ krb5KDCSrv|lower }}
+  admin_server = {{ krb5AdminSrv|lower }}
+}
+
+[domain_realm]
+ .{{ krb5realm|lower }} = {{ krb5realm|upper() }}
+{{ krb5realm|lower }} = {{ krb5realm|upper() }}

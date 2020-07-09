@@ -1,4 +1,9 @@
 #!/bin/bash
+export REALM="HOME.COM"
+export krb5DBpw="password123"
+export krb5admpw="password123"
+export krb5kdcldap="password123"
+export krb5adminldap="password123"
 
 #Change logging level
 sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f ../ldif/logging.ldif

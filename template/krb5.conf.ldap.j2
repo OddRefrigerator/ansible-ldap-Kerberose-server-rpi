@@ -1,0 +1,31 @@
+[libdefaults]
+  default_realm = {{ krb5realm|upper() }}
+  dns_lookup_kdc = true
+  dns_lookup_realm = true
+  forwardable = true
+  proxiable = true
+  rdns = false
+
+[realms]
+  {{ krb5realm|upper() }} = {
+    kdc = {{ krb5KDCSrv|lower }}
+    admin_server = {{ krb5AdminSrv|lower }}
+    database_module = openldap_ldapconf
+  }
+
+[domain_realm]
+ .{{ krb5realm|lower }} = {{ krb5realm|upper() }}
+{{ krb5realm|lower }} = {{ krb5realm|upper() }}
+		
+[dbmodules] 
+ openldap_ldapconf = {
+   db_library = kldap
+   disable_last_success = true
+   disable_lockout = true
+   ldap_kdc_dn = "cn=krb5-kdc,{{ ldapBaseDN }}"
+   ldap_kadmind_dn = "cn=krb5-admin,{{ ldapBaseDN }}"
+   ldap_kerberos_container_dn = "cn=krbContainer,{{ ldapBaseDN }}"
+   ldap_servers = ldap://{{ hostName }}
+   ldap_service_password_file = /etc/openldap.keyfile
+   ldap_conns_per_server = 5
+  }

@@ -1,0 +1,12 @@
+timeZone: America/Toronto
+hostName: auth.home.local
+krb5realm: HOME.LOCAL
+krb5DBpw: password123
+krb5KDCSrv: auth.home.local
+krb5AdminSrv: auth.home.local
+ldapDBpw: password123
+ldapBaseDN: dc=home,dc=local
+ldapAdminpw: "{SSHA}woxhkYtQJxua+zRyDTWHLPIXK3JHMjKu"
+ldapAdminpwPlain: password123
+ldapkdcpw: password123
+ldapkadminpw: password123

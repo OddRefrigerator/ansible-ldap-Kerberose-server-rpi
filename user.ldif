@@ -1,0 +1,20 @@
+dn: cn=ldapUser,ou=groups,dc=home,dc=com
+objectClass: posixGroup
+cn: netUser
+gidNumber: 10001
+description: ldap user group
+
+dn: uid=pi,ou=users,dc=home,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: pi
+uid: pi
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/pi
+loginShell: /bin/bash
+description: raspberry pi builtin account
+gecos: raspberry pi
+userPassword: toor

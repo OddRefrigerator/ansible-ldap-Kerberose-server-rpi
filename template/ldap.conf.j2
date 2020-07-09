@@ -1,0 +1,16 @@
+HOST         {{ hostName }}
+BASE	     {{ ldapBaseDN }}
+LDAP_VERSION 3
+BINDDN cn=admin,{{ ldapBaseDN }}
+BINDPW {{ ldapAdminpw }}
+URI ldap://{{ hostName }}
+
+#SIZELIMIT	12
+#TIMELIMIT	15
+#DEREF		never
+
+# TLS certificates (needed for GnuTLS)
+TLS_CACERT	/etc/ssl/certs/ca-certificates.crt
+SASL_MECH GSSAPI
+SASL_REALM {{ krb5realm|upper() }}
+krb5_ccname /var/run/nslcd/nslcd.tkt

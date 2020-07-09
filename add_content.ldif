@@ -1,0 +1,50 @@
+dn: ou=groups,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: ou=users,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=machines,dc=home,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: machines
+
+dn: cn=ldapUser,ou=groups,dc=home,dc=com
+objectClass: posixGroup
+cn: netUser
+gidNumber: 10001
+description: ldap user group
+
+dn: uid=pi,ou=users,dc=home,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: pi
+uid: pi
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/pi
+loginShell: /bin/bash
+description: raspberry pi builtin account
+gecos: raspberry pi
+userPassword: toor
+
+dn: uid=mediaPlayer,ou=users,dc=home,dc=com
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: mediaPlayer
+uid: mediaPlayer
+uidNumber: 10002
+gidNumber: 10001
+homeDirectory: /home/mediaPlayer
+loginShell: /bin/bash
+description: mediaPlayer service account
+gecos: mediaPlayer 
+userPassword: mediaPlayer

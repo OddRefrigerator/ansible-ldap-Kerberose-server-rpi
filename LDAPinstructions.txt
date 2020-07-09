@@ -21,7 +21,8 @@ sudo ./installldapscripts.sh
 
 On client:
 ----------
-sudo  apt install libnss-ldapd libpam-krb5 libpam-ldap
+#sudo apt install krb5-{user,config,doc,k5tls} libpam-{krb5,ccreds} sssd
+sudo  apt install libpam-krb5 libpam-ldap libnss-ldapd
 sudo kadmin -p krbadmin 
 sudo kadmin -q "addprinc -randkey host/kdc.home.local"
 sudo kadmin -q "ktadd host/kdc.home.local"
@@ -38,15 +39,17 @@ cn=admin,dc=auth,dc=home,dc=local
 cn=admin,dc=auth,dc=home,dc=local
 
 find . -type f -exec grep -H 'admin' {} \;
+find / -type f -exec grep -H 'binddn' {} \;
+find / -name slapd.conf
 
-#sudo ./createkrb5princs.sh 
-#sudo sh -c "echo -n 'password123' > /etc/libnss-ldap.secret"
-#sudo dpkg-reconfigure libnss-ldapd
-#sudo pam-auth-update
+nano /usr/share/slapd/slapd.conf
+
+journalctl --since "2020-05-16 17:51:00" -u systemd-sysuser
 
 sudo dpkg-reconfigure krb5-config
 sudo dpkg-reconfigure slapd
 sudo dpkg-reconfigure libnss-ldapd
+sudo pam-auth-update
 
 sudo ldapadd -x -D cn=admin,dc=home,dc=local -w password123 -H ldap://auth.home.local -f krb5admin.ldif -c
 
@@ -54,7 +57,7 @@ ldapsearch -H ldap://auth.home.local -x -b "dc=home,dc=home"
 ldapwhoami -H ldap://auth.home.local -x
 sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=local
 
-sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config cn
+KRB5_TRACE=/dev/stdout kinit wronguser
 
 sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}mdb,cn=config
 sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=home,dc=local
@@ -85,6 +88,7 @@ ldapsearch -x -LLL -b dc=home,dc=local 'uid=steve' cn gidNumber ou
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=ldapUsers,dc=home,dc=local"
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b "cn=schema,cn=config" cn
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config
+ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config -s base "objectclass=*"
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b olcDatabase={1}hdb,cn=config
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=config '(olcDatabase={1}mdb)' olcAccess
 ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=home.local,cn=krbContainer,dc=home,dc=local
@@ -176,6 +180,10 @@ dn: olcDatabase={1}mdb,cn=config
 
 sudo apt install krb5-{kdc,admin-server,config,kdc-ldap}
 
+[logging]
+ default = FILE:/var/log/krb5-default.log
+ kdc = FILE:/var/log/krb5-kdc.log
+ admin_server = FILE:/var/log/krb5-admin.log
 
 #sudo kdb5_ldap_util -D uid=admin,dc=auth,dc=home,dc=local -w password123 stashsrvpw uid=kdc-service,dc=auth,dc=home,dc=local
 
@@ -200,3 +208,5 @@ C       countryName
 STREET  streetAddress
 DC      domainComponent
 UID     userid
+
+openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes -out /etc/ssl/ldap.crt -keyout /etc/ssl/private/ldap.pem
