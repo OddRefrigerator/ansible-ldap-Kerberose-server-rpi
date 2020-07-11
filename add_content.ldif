@@ -32,19 +32,34 @@ homeDirectory: /home/pi
 loginShell: /bin/bash
 description: raspberry pi builtin account
 gecos: raspberry pi
-userPassword: toor
+userPassword: {CRYPT}x
 
-dn: uid=mediaPlayer,ou=users,dc=home,dc=local
+dn: uid=mariadbUser1,ou=users,dc=home,dc=local
 objectClass: top
 objectClass: account
 objectClass: posixAccount
 objectClass: shadowAccount
-cn: mediaPlayer
-uid: mediaPlayer
+cn: mariadbUser1
+uid: mariadbUser1
 uidNumber: 10002
 gidNumber: 10001
-homeDirectory: /home/mediaPlayer
+homeDirectory: /home/mariadbUser1
 loginShell: /bin/bash
-description: mediaPlayer service account
-gecos: mediaPlayer 
-userPassword: mediaPlayer
+description: mariadbUser1 service account
+gecos: mariadbUser1 
+userPassword: {CRYPT}x
+
+dn: uid=mariadbReplication,ou=users,dc=home,dc=local
+objectClass: top
+objectClass: account
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: mariadbReplication
+uid: mariadbReplication
+uidNumber: 10003
+gidNumber: 10001
+homeDirectory: /home/mariadbReplication
+loginShell: /bin/bash
+description: mariaDB replication service account
+gecos: mariadbReplication 
+userPassword: {CRYPT}x

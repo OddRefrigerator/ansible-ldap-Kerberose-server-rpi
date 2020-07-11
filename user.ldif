@@ -17,4 +17,4 @@ homeDirectory: /home/pi
 loginShell: /bin/bash
 description: raspberry pi builtin account
 gecos: raspberry pi
-userPassword: toor
+userPassword: {CRYPT}x
